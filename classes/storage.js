@@ -63,3 +63,47 @@ module.exports.download_file = function(url, destination)
 		});
 	});
 }
+
+module.exports.delete_files = function delete_files(files){
+	return delete_file(files, 0);
+}
+
+function delete_file(files, index)
+{
+	return new Promise((resolve, reject) => {
+		
+		if(files.length > 0)
+		{
+			fs.unlink(files[index], function(err)
+			{
+				if(err)
+				{
+					reject(err)
+				}
+				else
+				{
+					if(index < files.length - 1)
+					{
+						delete_file(files, index + 1)
+						.then(function(result)
+						{
+							resolve();
+						})
+						.catch(function(error)
+						{
+							reject(error)
+						});
+					}
+					else
+					{
+						resolve();
+					}
+				}
+			});
+		}
+		else
+		{
+			resolve();
+		}
+	});
+}

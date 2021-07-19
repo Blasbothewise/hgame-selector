@@ -15,8 +15,8 @@ const vndb_socket = new WebSocket('ws://api.vndb.org:19534', {
 
 function createWindow () {
 	const win = new BrowserWindow({
-		width: screen.getPrimaryDisplay().workAreaSize.width / 1.5,
-		height: screen.getPrimaryDisplay().workAreaSize.height / 1.5,
+		width: screen.getPrimaryDisplay().size.width / 1.5,
+		height: screen.getPrimaryDisplay().size.height / 1.5,
 		webPreferences: {
 			nodeIntegration: true,
 			contextIsolation: false, //enable require calls from web to electron
@@ -420,6 +420,8 @@ function removeHgame(circle_index, hgame_index)
 {
 	return new Promise((resolve, reject) => {
 		
+		let icon_path = collection.circles[circle_index].hgames[hgame_index].icon_path;
+		
 		collection.circles[circle_index].hgames.splice(hgame_index, 1);
 		
 		if(collection.circles[circle_index].hgames.length === 0)
@@ -427,7 +429,10 @@ function removeHgame(circle_index, hgame_index)
 			collection.circles.splice(circle_index, 1);
 		}
 		
-		saveJSON("collection.json", collection)
+		storage.delete_files([__dirname + "/" + icon_path])
+		.then(function(result){
+			return saveJSON("collection.json", collection);
+		})
 		.then(function(result){
 			resolve(collection);
 		})
