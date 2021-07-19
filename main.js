@@ -6,6 +6,7 @@ const storage = require('./classes/storage.js');
 const validator = require("validator");
 const child = require('child_process').execFile;
 const WebSocket = require('ws');
+const fs = require('fs');
 
 const vndb_socket = new WebSocket('ws://api.vndb.org:19534', {
 	perMessageDeflate: false
@@ -36,6 +37,21 @@ var collection, config;
 function initialiseApp()
 {
 	console.log(__dirname);
+	
+	if(!fs.existsSync(__dirname + "/temporary_files"))
+	{
+		fs.mkdirSync(__dirname + "/temporary_files");
+	}
+	
+	if(!fs.existsSync(__dirname + "/userdata"))
+	{
+		fs.mkdirSync(__dirname + "/userdata");
+	}
+	
+	if(!fs.existsSync(__dirname + "/userdata/icons"))
+	{
+		fs.mkdirSync(__dirname + "/userdata/icons");
+	}
 	
 	json.setDataPath(app.getAppPath() + "\\userdata");
 	console.log(json.getDataPath());
