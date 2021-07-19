@@ -298,7 +298,7 @@ function addHgame(data)
 		})
 		.then(function(result){
 			
-			result = "userdata" + result.split('userdata').pop();
+			result = "./userdata" + result.split('userdata').pop();
 			
 			let Hgame = {
 				name: data.name,
@@ -326,6 +326,8 @@ function editHgame(data)
 {
 	return new Promise((resolve, reject) => {	
 		
+		let old_icon = collection.circles[data.circle_index].hgames[data.hgame_index].icon_path;
+		
 		collection.circles[data.circle_index].hgames.splice(data.hgame_index, 1); // remove prev record
 		
 		let circle_index = getCircleIndex(data.hgame.circle);
@@ -351,67 +353,91 @@ function editHgame(data)
 		
 		let icon = data.hgame.icon_path;
 		
-		let iconCheck;
-		
-		if(validator.isURL(icon) === true)
+		if(icon === old_icon)
 		{
-			iconCheck = storage.download_file(icon, __dirname + "/temporary_files/");
-		}
-		else
-		{
-			iconCheck = new Promise((resolve, reject) => {resolve()});
-		}
-		
-		iconCheck
-		.then(function(result){
-			
-			let file_name = data.hgame.name.replaceAll('\\', '');
-			file_name = file_name.replaceAll('//', '');
-			file_name = file_name.replaceAll(':', '');
-			file_name = file_name.replaceAll('*', '');
-			file_name = file_name.replaceAll('?', '');
-			file_name = file_name.replaceAll('"', '');
-			file_name = file_name.replaceAll('<', '');
-			file_name = file_name.replaceAll('>', '');
-			file_name = file_name.replaceAll('|', '');
-			
-			if(result !== undefined)
-			{
-				return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
-			}
-			else
-			{
-				if(icon.includes("./userdata/icons"))
-				{
-					icon = __dirname + "/" + icon;
-				}
-				
-				return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
-			}
-		})
-		.then(function(result){
-			
-			result = "userdata" + result.split('userdata').pop();
-			
 			let Hgame = {
 				name: data.hgame.name,
 				jp_name: data.hgame.jp_name,
 				exe_path: data.hgame.exe_path,
-				icon_path: result,
+				icon_path: icon,
 				tags: data.hgame.tags,
 				favorite: false
 			};
 			
 			collection.circles[circle_index].hgames.push(Hgame);
 			
-			return saveJSON("collection.json", collection);
-		})
-		.then(function(result){
-			resolve(collection);
-		})
-		.catch(function(error){
-			reject(error);
-		});
+			saveJSON("collection.json", collection)
+			.then(function(result){
+				resolve(collection);
+			})
+			.catch(function(error){
+				reject(error);
+			});
+		}
+		else
+		{
+			storage.delete_files([__dirname + "/" + old_icon])
+			.then(function(result){
+			
+				if(validator.isURL(icon) === true)
+				{
+					return storage.download_file(icon, __dirname + "/temporary_files/");
+				}
+				else
+				{
+					return new Promise((resolve, reject) => {resolve()});
+				}
+			})
+			.then(function(result){
+				
+				let file_name = data.hgame.name.replaceAll('\\', '');
+				file_name = file_name.replaceAll('//', '');
+				file_name = file_name.replaceAll(':', '');
+				file_name = file_name.replaceAll('*', '');
+				file_name = file_name.replaceAll('?', '');
+				file_name = file_name.replaceAll('"', '');
+				file_name = file_name.replaceAll('<', '');
+				file_name = file_name.replaceAll('>', '');
+				file_name = file_name.replaceAll('|', '');
+				
+				if(result !== undefined)
+				{
+					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
+				}
+				else
+				{
+					if(icon.includes("./userdata/icons"))
+					{
+						icon = __dirname + "/" + icon;
+					}
+					
+					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
+				}
+			})
+			.then(function(result){
+				
+				result = "./userdata" + result.split('userdata').pop();
+				
+				let Hgame = {
+					name: data.hgame.name,
+					jp_name: data.hgame.jp_name,
+					exe_path: data.hgame.exe_path,
+					icon_path: result,
+					tags: data.hgame.tags,
+					favorite: false
+				};
+				
+				collection.circles[circle_index].hgames.push(Hgame);
+				
+				return saveJSON("collection.json", collection);
+			})
+			.then(function(result){
+				resolve(collection);
+			})
+			.catch(function(error){
+				reject(error);
+			});
+		}
 	});
 }
 

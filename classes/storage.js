@@ -15,7 +15,7 @@ module.exports.moveFile = function (source, destination)
 				reject(err);
 			}
 			else
-			{
+			{				
 				resolve(destination);
 			}
 		});

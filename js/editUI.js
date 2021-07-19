@@ -202,7 +202,10 @@ function init_edit_Page()
 	
 	document.getElementById("edit_icon_file").addEventListener("change", function()
 	{
+		console.log(this.files[0].path);
+		
 		document.getElementById("edit_icon").value = this.files[0].path;
+		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + this.files[0].path + '")';
 		this.value = "";
 	});
 	
