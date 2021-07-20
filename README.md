@@ -9,7 +9,9 @@ A desktop application for visualising and navigating your hgame collection.
 ## FAQ:
 
 - How do I transfer my collection data between versions?
+	
 	Copy the "userdata" folder to the same location on the new build, found at: "[APP DIRECTORY]/resources/app/userdata/"
 	
 - How do I edit a hgame?
+	
 	Find the hgame in your collection and right click it.
