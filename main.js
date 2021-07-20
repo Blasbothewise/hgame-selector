@@ -5,13 +5,7 @@ const scraper_importer = require('./classes/scraper_importer.js');
 const storage = require('./classes/storage.js');
 const validator = require("validator");
 const child = require('child_process').execFile;
-const WebSocket = require('ws');
 const fs = require('fs');
-
-const vndb_socket = new WebSocket('ws://api.vndb.org:19534', {
-	perMessageDeflate: false
-});
-
 
 function createWindow () {
 	const win = new BrowserWindow({
@@ -105,14 +99,15 @@ function initialiseComms()
 		});
 	});
 	
-	ipcMain.on('import_VNDB', (event, args) => {
-		scraper_importer.importVNDB(args /*creds here*/)
+	ipcMain.on('import_VNDB', (event, args) => {		
+		scraper_importer.importVNDB(args)
 		.then(function(result){
-			event.reply('scrape_dlsite_res', {status: "success", data: result});
+			event.reply('import_vndb_res', {status: "success", data: result.items[0]});
 		})
 		.catch(function(error){
-			event.reply('scrape_dlsite_res', {status: "error", message: error});
-		});
+			console.log(error);
+			event.reply('import_vndb_res', {status: "error", message: error});
+		})
 	});
 	
 	ipcMain.on('addHgame', (event, args) => {
@@ -178,18 +173,21 @@ function initialiseComms()
 		});
 	});
 	
-	init_vndb_websocket();
-}
-
-function init_vndb_websocket()
-{
-	vndb_socket.on('open', function open() {
-		vndb_socket.send("login {\"protocol\":0,\"client\":\"hgame_selector\",\"clientver\":0.5}");
+	scraper_importer.loginVNDB_basic()
+	.then(function(result){
+		console.log(result);
+	})
+	.catch(function(error){
+		console.log(error);
 	});
-	
-	vndb_socket.on('message', function incoming(data) {
-		console.log(data);
-	});
+	/*
+	scraper_importer.loginVNDB()
+	.then(function(result){
+		console.log(result);
+	})
+	.catch(function(error){
+		console.log(error);
+	});*/
 }
 
 function hgameExists(val, varName)
@@ -199,6 +197,25 @@ function hgameExists(val, varName)
 		for(let i2 = 0; i2 < collection.circles[i].hgames.length; i2++)
 		{
 			if(collection.circles[i].hgames[i2][varName] === val)
+			{
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+function hgameExists_notAtIndex(val, varName, circle_index, hgame_index)
+{
+	circle_index = parseInt(circle_index);
+	hgame_index = parseInt(hgame_index);
+	
+	for(let i = 0; i < collection.circles.length; i++)
+	{
+		for(let i2 = 0; i2 < collection.circles[i].hgames.length; i2++)
+		{
+			if(collection.circles[i].hgames[i2][varName] === val && i === circle_index && i2 !== hgame_index || collection.circles[i].hgames[i2][varName] === val && i !== circle_index)
 			{
 				return true;
 			}
@@ -248,12 +265,20 @@ function addHgame(data)
 			[data.exe_path, "exe_path"]
 		];
 		
+		let exists = false;
+		
 		for(let i = 0; i < existChecks.length; i++)
 		{
 			if(hgameExists(existChecks[i][0], existChecks[i][1]) === true)
 			{
-				throw "Hgame already exists";
+				exists = true;
+				break;
 			}
+		}
+		
+		if(exists === true)
+		{
+			throw "Hgame already added";
 		}
 		
 		let icon = data.icon_path;
@@ -326,7 +351,32 @@ function editHgame(data)
 {
 	return new Promise((resolve, reject) => {	
 		
+		//Check edited result won't duplicate another record
+		let existChecks = [
+			[data.hgame.name, "name"],
+			[data.hgame.jp_name, "jp_name"],
+			[data.hgame.exe_path, "exe_path"]
+		];
+		
+		let exists = false;
+		
+		for(let i = 0; i < existChecks.length; i++)
+		{
+			if(hgameExists_notAtIndex(existChecks[i][0], existChecks[i][1], data.circle_index, data.hgame_index) === true)
+			{
+				exists = true;
+				break;
+			}
+		}
+		
+		if(exists === true)
+		{
+			throw "Edit would create duplicate hgame";
+		}
+		
 		let old_icon = collection.circles[data.circle_index].hgames[data.hgame_index].icon_path;
+		
+		console.log("boog");
 		
 		collection.circles[data.circle_index].hgames.splice(data.hgame_index, 1); // remove prev record
 		
@@ -335,20 +385,6 @@ function editHgame(data)
 		if(circle_index === null)
 		{
 			circle_index = addCircle(data.circle);
-		}
-		
-		let existChecks = [
-			[data.hgame.name, "name"],
-			[data.hgame.jp_name, "jp_name"],
-			[data.hgame.exe_path, "exe_path"]
-		];
-		
-		for(let i = 0; i < existChecks.length; i++)
-		{
-			if(hgameExists(existChecks[i][0], existChecks[i][1]) === true)
-			{
-				throw "Hgame already exists";
-			}
 		}
 		
 		let icon = data.hgame.icon_path;

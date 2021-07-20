@@ -6,7 +6,6 @@ function addHgame()
 		document.getElementById("add_exe"),
 		document.getElementById("add_icon"),
 		document.getElementById("add_circle"),
-		document.getElementById("add_tags_box"),
 	];
 	
 	let valError = false;
@@ -20,8 +19,15 @@ function addHgame()
 		}
 		else
 		{
-			elems[i].borderColor = "white";
+			elems[i].style.borderColor = "white";
 		}
+	}
+	
+	let tags = document.getElementById("add_tags_box").value.split("£");
+	
+	if(tags[0] === "")
+	{
+		tags = [];
 	}
 	
 	if(valError === false)
@@ -32,7 +38,7 @@ function addHgame()
 			exe_path: document.getElementById("add_exe").value.trim(),
 			icon_path: document.getElementById("add_icon").value.trim(),
 			circle: document.getElementById("add_circle").value.toLowerCase(),
-			tags: document.getElementById("add_tags_box").value.split("£"),
+			tags: tags,
 		};
 		
 		ipcRenderer.send('addHgame', Hgame);
@@ -97,21 +103,119 @@ function add_tag_import(cntr_id, value)
 
 function populateDlsiteData(data)
 {	
-	document.getElementById("add_name").value = data.name.name;
-	document.getElementById("add_jp_name").value = data.jp_name;
-	document.getElementById("add_icon").value = data.icon;
-	document.getElementById("add_icon_display").style.backgroundImage = 'url("' + data.icon + '")';
-	
-	document.getElementById("add_circle").value = data.brand.name;
-	
-	//add tags loop
-	
-	for(let i = 0; i < data.product_metadata.Genre.items.length; i++)
+	if(document.getElementById("add_tab").ariaSelected === "true")
 	{
-		add_tag_import("add_tags_box", data.product_metadata.Genre.items[i].trim());
+		document.getElementById("add_name").value = data.name.name;
+		document.getElementById("add_jp_name").value = data.jp_name;
+		document.getElementById("add_icon").value = data.icon;
+		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + data.icon + '")';
+		
+		document.getElementById("add_circle").value = data.brand.name;
+		
+		//clear tags
+		
+		let tags_box = document.getElementById("add_tags_box");
+		tags_box.value = "";
+		while(tags_box.firstChild)
+		{
+			tags_box.removeChild(tags_box.firstChild);
+		}
+		
+		//add tags loop
+		
+		for(let i = 0; i < data.product_metadata.Genre.items.length; i++)
+		{
+			add_tag_import("add_tags_box", data.product_metadata.Genre.items[i].trim());
+		}
+		
+		document.getElementById("add_dlsite_import_menu").style.display = "none";
 	}
 	
-	document.getElementById("add_dlsite_import_menu").style.display = "none";
+	if(document.getElementById("edit_tab").ariaSelected === "true")
+	{
+		document.getElementById("edit_name").value = data.name.name;
+		document.getElementById("edit_jp_name").value = data.jp_name;
+		document.getElementById("edit_icon").value = data.icon;
+		document.getElementById("edit_icon_display").style.backgroundImage = 'url("' + data.icon + '")';
+		
+		document.getElementById("edit_circle").value = data.brand.name;
+		
+		//clear tags
+		
+		let tags_box = document.getElementById("edit_tags_box");
+		tags_box.value = "";
+		while(tags_box.firstChild)
+		{
+			tags_box.removeChild(tags_box.firstChild);
+		}
+		
+		//add tags loop
+		
+		for(let i = 0; i < data.product_metadata.Genre.items.length; i++)
+		{
+			add_tag_import("edit_tags_box", data.product_metadata.Genre.items[i].trim());
+		}
+		
+		document.getElementById("edit_dlsite_import_menu").style.display = "none";
+	}
+}
+
+function populateVNDBData(data)
+{
+	if(document.getElementById("add_tab").ariaSelected === "true")
+	{
+		document.getElementById("add_name").value = data.title;
+		document.getElementById("add_jp_name").value = data.original;
+		document.getElementById("add_icon").value = data.image;
+		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + data.image + '")';
+		
+		//document.getElementById("add_circle").value = ;
+		
+		//clear tags
+		
+		let tags_box = document.getElementById("add_tags_box");
+		tags_box.value = "";
+		while(tags_box.firstChild)
+		{
+			tags_box.removeChild(tags_box.firstChild);
+		}
+		
+		//add tags loop
+		/*
+		for(let i = 0; i < data.product_metadata.Genre.items.length; i++)
+		{
+			add_tag_import("add_tags_box", data.product_metadata.Genre.items[i].trim());
+		}*/
+		
+		document.getElementById("add_vndb_import_menu").style.display = "none";
+	}
+	if(document.getElementById("edit_tab").ariaSelected === "true")
+	{
+		document.getElementById("edit_name").value = data.title;
+		document.getElementById("edit_jp_name").value = data.original;
+		document.getElementById("edit_icon").value = data.image;
+		document.getElementById("edit_icon_display").style.backgroundImage = 'url("' + data.image + '")';
+		
+		//document.getElementById("edit_circle").value = ;
+		
+		//clear tags
+		
+		let tags_box = document.getElementById("edit_tags_box");
+		tags_box.value = "";
+		while(tags_box.firstChild)
+		{
+			tags_box.removeChild(tags_box.firstChild);
+		}
+		
+		//add tags loop
+		/*
+		for(let i = 0; i < data.product_metadata.Genre.items.length; i++)
+		{
+			add_tag_import("edit_tags_box", data.product_metadata.Genre.items[i].trim());
+		}*/
+		
+		document.getElementById("edit_vndb_import_menu").style.display = "none";
+	}
 }
 
 function clearAddForm()
@@ -162,6 +266,8 @@ function disable_inport_form(elem)
 
 function enable_import_form(elem)
 {
+	console.log(elem);
+	
 	if(elem.nodeName === "INPUT")
 	{
 		elem.disabled = false;

@@ -117,13 +117,21 @@ function initialise_comms()
 		{
 			console.log(args);
 			populateDlsiteData(args.data);
-			enable_import_form(document.getElementById("add_dlsite_import_submit"));
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
+		}
+		
+		if(document.getElementById("add_tab").ariaSelected === "true")
+		{
 			enable_import_form(document.getElementById("add_dlsite_import_submit"));
+		}
+		
+		if(document.getElementById("edit_tab").ariaSelected === "true")
+		{
+			enable_import_form(document.getElementById("edit_dlsite_import_submit"));
 		}
 	});
 	
@@ -131,12 +139,22 @@ function initialise_comms()
 		if(args.status === "success")
 		{
 			console.log(args);
-			//Do something
+			populateVNDBData(args.data);
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
+		}
+		
+		if(document.getElementById("add_tab").ariaSelected === "true")
+		{
+			enable_import_form(document.getElementById("add_vndb_import_submit"));
+		}
+		
+		if(document.getElementById("edit_tab").ariaSelected === "true")
+		{
+			enable_import_form(document.getElementById("edit_vndb_import_submit"));
 		}
 	});
 	

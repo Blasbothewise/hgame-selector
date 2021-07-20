@@ -21,6 +21,12 @@ async function fetchHTML(url) {
   return cheerio.load(data)
 }
 
+/*
+##########
+# DLsite #
+##########
+*/
+
 function getDLCode(url, matchSet)
 {
 	url = url.replace(".html", "");
@@ -214,7 +220,56 @@ module.exports.scrapeDLsite = function(url)
 	});
 }
 
-module.exports.importVNDB = function(url, creds)
+/*
+########
+# VNDB #
+########
+*/
+
+const vndb_api = require('vndb-api');
+const vndb_client = new vndb_api('hgame-selector', {
+	host: 'api.vndb.org',
+	port: 19535,
+	encoding: 'utf-8',
+	queryLimit: 10,
+	queryInterval: 30000,
+	minConnection: 1,
+	maxConnection: 2,
+	idleTimeoutMillis: 30000,
+	acquireTimeout: 30000,
+	propagateCreateError: true,
+});
+
+module.exports.loginVNDB = function(creds)
 {
-	
+	return vndb_client.query('login {\"protocol\":1,\"client\":\"hgame_selector\",\"clientver\":"1.1.0"}');
+}
+
+module.exports.loginVNDB_basic = function()
+{
+	return vndb_client.query('login {\"protocol\":1,\"client\":\"hgame_selector\",\"clientver\":"1.1.0"}');
+}
+
+module.exports.importVNDB = function(url)
+{
+	return new Promise((resolve,reject) => {
+		
+		if(!url.includes("https://vndb.org/"))
+		{
+			throw "Url not vndb url.";
+		}
+		else
+		{
+			id = url.split(".org/v").pop();
+			
+			vndb_client.query("get vn basic,details,tags (id = " + id + ")")
+			.then(function(result){
+				resolve(result);
+			})
+			.catch(function(error)
+			{
+				reject(error);
+			})
+		}
+	});
 }

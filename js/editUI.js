@@ -14,7 +14,6 @@ function editHgame()
 		document.getElementById("edit_exe"),
 		document.getElementById("edit_icon"),
 		document.getElementById("edit_circle"),
-		document.getElementById("edit_tags_box"),
 	];
 	
 	let valError = false;
@@ -32,6 +31,13 @@ function editHgame()
 		}
 	}
 	
+	let tags = document.getElementById("edit_tags_box").value.split("£")
+	
+	if(tags[0] === "")
+	{
+		tags = [];
+	}
+	
 	if(valError === false)
 	{
 		let Hgame = {
@@ -40,7 +46,7 @@ function editHgame()
 			exe_path: document.getElementById("edit_exe").value.trim(),
 			icon_path: document.getElementById("edit_icon").value.trim(),
 			circle: document.getElementById("edit_circle").value.toLowerCase(),
-			tags: document.getElementById("edit_tags_box").value.split("£"),
+			tags: tags,
 		};
 		
 		let submit_btn = document.getElementById("edit_submit");

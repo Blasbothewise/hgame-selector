@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  -->
-<!--  Last Published: Mon Jul 19 2021 21:41:20 GMT+0000 (Coordinated Universal Time)  -->
+<!--  Last Published: Tue Jul 20 2021 19:12:19 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="60f46555aeb557937ba1509f" data-wf-site="60ef2eb312b1833cde8808a3">
 <head>
   <meta charset="utf-8">
@@ -75,6 +75,12 @@
               <div id="add_dlsite_import_submit" func="import_DLsite" sibling="add_dlsite_import_tbx" class="add_import_menu_submit">Submit</div>
               <div id="add_dlsite_import_close" class="add_import_menu_close">Close</div>
             </div>
+            <div id="add_vndb_import_opt" menu_id="add_vndb_import_menu" class="add_import_opt">VNDB</div>
+            <div id="add_vndb_import_menu" class="add_import_menu">
+              <div class="add_import_tbx_cntr w-embed"><input placeholder="VNDB URL" class="add_import_tbx" id="add_vndb_import_tbx" sibling="add_vndb_import_submit"></div>
+              <div id="add_vndb_import_submit" func="import_VNDB" sibling="add_vndb_import_tbx" class="add_import_menu_submit">Submit</div>
+              <div id="add_vndb_import_close" class="add_import_menu_close">Close</div>
+            </div>
           </div>
           <div class="add_edit_input_spacer"></div>
         </div>
@@ -133,6 +139,24 @@
     <div class="add_edit_header">Edit or remove a hentai game</div>
     <div class="add_edit_form_sect">
       <div class="add_edit_form_cntr">
+        <div class="add_edit_input">
+          <div class="add_edit_input_lbl">Import from platform</div>
+          <div class="add_import_opts_row">
+            <div id="edit_dlsite_import_opt" menu_id="edit_dlsite_import_menu" class="add_import_opt">DLsite</div>
+            <div id="edit_dlsite_import_menu" class="add_import_menu">
+              <div class="add_import_tbx_cntr w-embed"><input placeholder="DLsite product URL" class="add_import_tbx" id="edit_dlsite_import_tbx" sibling="edit_dlsite_import_submit"></div>
+              <div id="edit_dlsite_import_submit" func="import_DLsite" sibling="edit_dlsite_import_tbx" class="add_import_menu_submit">Submit</div>
+              <div id="edit_dlsite_import_close" class="add_import_menu_close">Close</div>
+            </div>
+            <div id="edit_vndb_import_opt" menu_id="edit_vndb_import_menu" class="add_import_opt">VNDB</div>
+            <div id="edit_vndb_import_menu" class="add_import_menu">
+              <div class="add_import_tbx_cntr w-embed"><input placeholder="VNDB URL" class="add_import_tbx" id="edit_vndb_import_tbx" sibling="edit_vndb_import_submit"></div>
+              <div id="edit_vndb_import_submit" func="import_VNDB" sibling="edit_vndb_import_tbx" class="add_import_menu_submit">Submit</div>
+              <div id="edit_vndb_import_close" class="add_import_menu_close">Close</div>
+            </div>
+          </div>
+          <div class="add_edit_input_spacer"></div>
+        </div>
         <div class="add_edit_input">
           <div class="add_edit_input_lbl">Name</div>
           <div class="add_edit_tbx_cntr w-embed"><input class="add_edit_tbx" id="edit_name" placeholder="-" disabled=""></div>

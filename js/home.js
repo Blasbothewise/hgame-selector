@@ -167,8 +167,9 @@ function populateHome(type, data)
 function initialise_home()
 {
 	document.getElementById("search_submit").addEventListener('click', function(){
-		populateHome("search",{collection: collection, searchTerm: document.getElementById("search_val").value.trim()});
+		populateHome("search",{collection: collection, searchTerm: document.getElementById("search_val").value.trim().toLowerCase()});
 		//ipcRenderer.send('searchCollection', {searchTerm: document.getElementById("search_val").value.trim()});
+		document.getElementById("search_val").value = "";
 	});
 	
 	document.getElementById("search_val").addEventListener('keypress', function(event){
@@ -176,6 +177,8 @@ function initialise_home()
 		{
 			populateHome("search",{collection: collection, searchTerm: document.getElementById("search_val").value.trim()});
 			//ipcRenderer.send('searchCollection', {searchTerm: document.getElementById("search_val").value.trim()});
+			
+			this.value = "";
 		}
 	});
 }
