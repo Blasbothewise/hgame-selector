@@ -1,5 +1,6 @@
 console.log("created scraper object");
 const validator = require("./validation.js");
+const validator_lib = require("validator");
 
 const makerUrls = [
 	"https://www.dlsite.com/maniax/circle/profile/=/maker_id/",
@@ -26,6 +27,61 @@ async function fetchHTML(url) {
 # DLsite #
 ##########
 */
+
+module.exports.getDLsiteFromDirName = function (folder_name)
+{
+	let splits = [];
+	
+	if(folder_name.includes("RJ"))
+	{
+		splits.push({type: "RJ", pot_id: folder_name.split("RJ").pop()});
+	}
+	
+	if(folder_name.includes("BJ"))
+	{
+		splits.push({type: "BJ", pot_id: folder_name.split("BJ").pop()});
+	}
+	
+	if(folder_name.includes("VJ"))
+	{
+		splits.push({type: "VJ", pot_id: folder_name.split("VJ").pop()});
+	}
+	
+	let winner;
+	
+	for(let i = 0; i < splits.length; i++)
+	{
+		if(validator_lib.isNumeric(splits[i].pot_id) === true)
+		{
+			winner = splits[i];
+			break;
+		}
+	}
+	
+	if(winner === undefined)
+	{
+		return undefined;
+	}
+	else
+	{
+		console.log(winner);
+		
+		switch(winner.type)
+		{
+			case "RJ":
+				return "https://www.dlsite.com/maniax/work/=/product_id/" + winner.type + winner.pot_id;
+			break;
+			
+			case "BJ":
+				return "https://www.dlsite.com/books/work/=/product_id/" + winner.type + winner.pot_id;
+			break;
+			
+			case "VJ":
+				return "https://www.dlsite.com/pro/work/=/product_id/" + winner.type + winner.pot_id;
+			break;
+		}
+	}
+}
 
 function getDLCode(url, matchSet)
 {

@@ -217,33 +217,6 @@ function initialise_comms()
 		}
 	});
 	
-	ipcRenderer.on('searchCollection_res', (event, args) => {
-		if(args.status === "success")
-		{
-			console.log(args);
-			//Do something
-			populateHome("search", { collection: args.data });
-		}
-		else
-		{
-			console.log(args.message);
-			printError(args.message);
-		}
-	});
-	
-	ipcRenderer.on('editSettings_res', (event, args) => {
-		if(args.status === "success")
-		{
-			console.log(args);
-			//Do something
-		}
-		else
-		{
-			console.log(args.message);
-			printError(args.message);
-		}
-	});
-	
 	ipcRenderer.on('executeEXE_res', (event, args) => {
 		if(args.status === "success")
 		{
@@ -256,6 +229,45 @@ function initialise_comms()
 			printError(args.message);
 		}
 	});
+	
+	ipcRenderer.on('scanForHgames_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			populateBatch(args.data);
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+		}
+	});
+	
+	ipcRenderer.on('getFolderPath_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			switch(args.data.type)
+			{
+				case "batch_dir":
+					console.log(args.data.val);
+					document.getElementById("batch_tbx").value = args.data.val;
+				break;
+			}
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			
+			switch(args.type)
+			{
+				case "batch_dir":
+					
+				break;
+			}
+		}
+	});
 }
 
 let collection;
@@ -266,6 +278,7 @@ function initialise()
 	initialise_home();
 	init_Add_Page();
 	init_edit_Page();
+	init_batch_Page();
 	
 	ipcRenderer.send('getCollection', undefined);
 	

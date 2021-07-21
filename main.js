@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain } = require('electron')
+const { app, BrowserWindow, screen, ipcMain, dialog } = require('electron')
 const json = require("electron-json-storage");
 require('dotenv').config();
 const scraper_importer = require('./classes/scraper_importer.js');
@@ -7,8 +7,10 @@ const validator = require("validator");
 const child = require('child_process').execFile;
 const fs = require('fs');
 
+var win;
+
 function createWindow () {
-	const win = new BrowserWindow({
+	win = new BrowserWindow({
 		width: screen.getPrimaryDisplay().size.width / 1.5,
 		height: screen.getPrimaryDisplay().size.height / 1.5,
 		webPreferences: {
@@ -151,14 +153,6 @@ function initialiseComms()
 		event.reply('searchCollection_res', {status: "success", data: searchCollection(args.searchTerm)})
 	});
 	
-	ipcMain.on('editSettings', (event, args) => {
-		
-	});
-	
-	ipcMain.on('getSettings', (event, args) => {
-		event.reply('getCollection_res', {status: "success", data: collection});
-	});
-	
 	ipcMain.on('executeEXE', (event, args) => {
 		child(args, function(err, data){
 			if(err)
@@ -173,6 +167,30 @@ function initialiseComms()
 		});
 	});
 	
+	ipcMain.on('scanForHgames', (event, args) => {
+		scanForHgames(args)
+		.then(function(result)
+		{
+			event.reply('scanForHgames_res', {status: "success", data: result});
+		})
+		.catch(function(error)
+		{
+			event.reply('scanForHgames_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('getFolderPath', (event, args) => {
+		dialog.showOpenDialog(win, {properties: ['openDirectory']})
+		.then(function(result)
+		{
+			event.reply('getFolderPath_res', {status: "success", data: {type: args, val: result.filePaths[0]}});
+		})
+		.catch(function(error)
+		{
+			event.reply('getFolderPath_res', {status: "error", message: error, type: args});
+		});
+	});
+	
 	scraper_importer.loginVNDB_basic()
 	.then(function(result){
 		console.log(result);
@@ -180,14 +198,6 @@ function initialiseComms()
 	.catch(function(error){
 		console.log(error);
 	});
-	/*
-	scraper_importer.loginVNDB()
-	.then(function(result){
-		console.log(result);
-	})
-	.catch(function(error){
-		console.log(error);
-	});*/
 }
 
 function hgameExists(val, varName)
@@ -477,7 +487,6 @@ function editHgame(data)
 	});
 }
 
-
 function removeHgame(circle_index, hgame_index)
 {
 	return new Promise((resolve, reject) => {
@@ -534,6 +543,99 @@ function searchCollection(searchTerm)
 	}
 	
 	return result;
+}
+
+function scanForHgames(directory)
+{
+	return new Promise((resolve, reject) => {
+		
+		let applications = [];
+		
+		let scan_res;
+		let identfied = [];
+		let unidentfied = [];
+		
+		storage.scanForExecutable(directory)
+		.then(function(result){
+			
+			scan_res = result;
+			
+			for(let i = 0; i < scan_res.length; i++)
+			{					
+				if(scan_res[i].dlsite_url !== undefined)
+				{
+					scan_res[i].type = "dlsite";
+					//Take first path from child directories search
+					scan_res[i].dir_name = scan_res[i].paths[0][0].dir_name;
+					scan_res[i].exes = scan_res[i].paths[0][0].exes;
+					identfied.push(scan_res[i]);
+					continue;
+				}
+				
+				let dlsite_url = scraper_importer.getDLsiteFromDirName(scan_res[i].dir_name.split("/").pop().toUpperCase());
+				
+				if(dlsite_url !== undefined)
+				{
+					scan_res[i].type = "dlsite";
+					scan_res[i].dlsite_url = dlsite_url,
+					identfied.push(scan_res[i]);
+					continue;
+				}
+				
+				scan_res[i].type = "unknown";
+				unidentfied.push(scan_res[i]);
+			}
+			
+			let scrape_imports = [];
+			
+			for(let i = 0; i < identfied.length; i++)
+			{
+				if(identfied[i].type === "dlsite")
+				{
+					//console.log("URL: " + identfied[i].dlsite_url);
+					
+					scrape_imports.push(scraper_importer.scrapeDLsite(identfied[i].dlsite_url));
+				}
+				else
+				{
+					crape_imports.push(new Promise((resolve, reject) => {resolve()}))
+				}
+			}
+			
+			return Promise.all(scrape_imports);
+		})
+		.then(function(results){
+			
+			for(let i = 0; i < results.length; i++)
+			{
+				if(results[i] === undefined)
+				{
+					
+				}
+				else
+				{
+					let application = {
+						app: identfied[i]
+					};
+					
+					switch(identfied[i].type)
+					{
+						case "dlsite":
+							application.import_scrape = results[i];
+						break;
+					}
+					
+					applications.push(application);
+				}
+			}
+			
+			resolve(applications);
+		})
+		.catch(function(error){
+			reject(error);
+		});
+		
+	});
 }
 
 function loadJSON(filename)
