@@ -299,9 +299,10 @@ function addHgame(data)
 		
 		let existChecks = [
 			[data.name, "name"],
-			[data.jp_name, "jp_name"],
 			[data.exe_path, "exe_path"]
 		];
+		
+		if(data.jp_name.trim() !== ""){existChecks.push([data.jp_name, "jp_name"])};
 		
 		let exists = false;
 		
@@ -400,9 +401,10 @@ function addHgameBatchRecursion(hgames, index)
 		
 		let existChecks = [
 			[data.name, "name"],
-			[data.jp_name, "jp_name"],
 			[data.exe_path, "exe_path"]
 		];
+		
+		if(data.jp_name.trim() !== ""){existChecks.push([data.jp_name, "jp_name"])};
 		
 		let exists = false;
 		
@@ -538,9 +540,10 @@ function editHgame(data)
 		//Check edited result won't duplicate another record
 		let existChecks = [
 			[data.hgame.name, "name"],
-			[data.hgame.jp_name, "jp_name"],
 			[data.hgame.exe_path, "exe_path"]
 		];
+		
+		if(data.hgame.jp_name.trim() !== ""){existChecks.push([data.hgame.jp_name, "jp_name"])};
 		
 		let exists = false;
 		

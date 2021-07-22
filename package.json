@@ -1,11 +1,12 @@
 {
   "name": "hgame-selector",
-  "version": "0.1.0",
+  "version": "1.2.2",
   "description": "My Electron app",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build-windows": "electron-packager . --icon ./assets/icons/windows/laplace.ico --out ../temp --overwrite"
+    "build-windows": "electron-packager . --icon ./assets/icons/windows/laplace.ico --out ../temp/windows --overwrite",
+	"build-linux": "electron-packager . --icon=./assets/icons/linux/laplace.png --platform=linux arch=x64 --out=../temp/linux --overwrite"
   },
   "keywords": [],
   "author": "James Blackwell",
