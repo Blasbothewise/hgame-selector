@@ -9,33 +9,6 @@ module.exports.check_undefined = function(var_array)
 	}
 }
 
-module.exports.validatePassword = function(value, opt) //returns a boolean or an integer dependant on options
-{	
-	let options = { 
-		minLength: 8, 
-		minLowercase: 1, 
-		minUppercase: 1, 
-		minNumbers: 1, 
-		minSymbols: 1, 
-		returnScore: false, 
-		pointsPerUnique: 1, 
-		pointsPerRepeat: 0.5, 
-		pointsForContainingLower: 10, 
-		pointsForContainingUpper: 10, 
-		pointsForContainingNumber: 10, 
-		pointsForContainingSymbol: 10 
-	};
-
-	if(opt === true)
-	{
-		return validator.isStrongPassword(value, options)
-	}
-	else
-	{
-		return validator.isStrongPassword(value);
-	}
-}
-
 module.exports.isOneOf = function isOneOf(val, valid_vals, varName)
 {
 	let match = false;
@@ -125,13 +98,6 @@ module.exports.validate = function(var_colls)
 				throw var_colls[i][2];
 			}
 		}
-		else if(var_colls[i][1] === "latlon")
-		{
-			if(validator.isLatLong(var_colls[i][0]) !== true)
-			{
-				throw var_colls[i][2];
-			}
-		}
 		else if(var_colls[i][1] === "boolean")
 		{
 			if(validator.isBoolean(var_colls[i][0]) !== true)
@@ -139,30 +105,9 @@ module.exports.validate = function(var_colls)
 				throw var_colls[i][2];
 			}
 		}
-		else if(var_colls[i][1] === "email")
-		{
-			if(validator.isEmail(var_colls[i][0]) !== true)
-			{
-				throw var_colls[i][2];
-			}
-		}
-		else if(var_colls[i][1] === "not_email")
-		{
-			if(validator.isEmail(var_colls[i][0]) === true)
-			{
-				throw var_colls[i][2];
-			}
-		}
 		else if(var_colls[i][1] === "url")
 		{
 			if(validator.isURL(var_colls[i][0]) !== true)
-			{
-				throw var_colls[i][2];
-			}
-		}
-		else if(var_colls[i][1] === "postcode")
-		{
-			if(validator.isPostalCode(var_colls[i][0]) !== true)
 			{
 				throw var_colls[i][2];
 			}
