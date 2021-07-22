@@ -421,7 +421,6 @@ function addHgameBatchRecursion(hgames, index)
 		{
 			if(index === hgames.length - 1)
 			{
-				console.log("skipped");
 				resolve("skipped");
 			}
 			else
@@ -743,8 +742,13 @@ function scanForHgames(directory)
 				{
 					scan_res[i].type = "dlsite";
 					//Take first path from child directories search
+					
+					console.log("SPECIAL PATH: " + scan_res[i].paths[0]);
+					console.log(scan_res[i]);
+					
 					scan_res[i].dir_name = scan_res[i].paths[0][0].dir_name;
 					scan_res[i].exes = scan_res[i].paths[0][0].exes;
+					
 					identfied.push(scan_res[i]);
 					continue;
 				}

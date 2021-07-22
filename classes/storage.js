@@ -185,7 +185,14 @@ function scanForExecutable(directory)
 							
 							applications.push(application);
 							
-							resolve(applications);
+							if(applications.length === 0 || application.paths.length === 0)
+							{
+								resolve(null);
+							}
+							else
+							{
+								resolve(applications);
+							}
 						})
 						.catch(function(error){
 							reject(error)
