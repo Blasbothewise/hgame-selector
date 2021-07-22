@@ -11,7 +11,10 @@ const makerUrls = [
 const productUrls = [
 	"https://www.dlsite.com/maniax/work/=/product_id/",
 	"https://www.dlsite.com/pro/work/=/product_id/",
-	"https://www.dlsite.com/books/work/=/product_id/"
+	"https://www.dlsite.com/books/work/=/product_id/",
+	"https://www.dlsite.com/maniax/announce/=/product_id/",
+	"https://www.dlsite.com/pro/announce/=/product_id/",
+	"https://www.dlsite.com/books/announce/=/product_id/",
 ];
 
 const cheerio = require('cheerio');

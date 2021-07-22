@@ -87,7 +87,10 @@ module.exports.is_dlsite_prod_url = function(url)
 	let val_cols = [
 		"www.dlsite.com/maniax/work/=/product_id/",
 		"www.dlsite.com/pro/work/=/product_id/",
-		"www.dlsite.com/books/work/=/product_id/"
+		"www.dlsite.com/books/work/=/product_id/",
+		"www.dlsite.com/maniax/announce/=/product_id/"
+		"www.dlsite.com/pro/announce/=/product_id/"
+		"www.dlsite.com/books/announce/=/product_id/"
 	];
 	
 	for(let i = 0; i < val_cols.length; i++)
