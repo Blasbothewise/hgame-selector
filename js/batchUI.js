@@ -46,6 +46,7 @@ function clear_batch_results()
 	sub.removeEventListener('click', submitBatch);
 	sub.classList.remove("batch_submit");
 	sub.classList.add("batch_submit_disabled");
+
 }
 
 function submitBatch()
@@ -54,37 +55,68 @@ function submitBatch()
 	
 	let hgames = [];
 	
+	let valError = false;
+	
 	for(let i = 0; i < results.length; i++)
 	{
-		let hgame = {};
+		let elems = [
+			results[i].children[0].children[0].children[0], // name
+			results[i].children[0].children[1].children[0], //circle
+			results[i].children[0].children[2].children[0], //exe path
+			results[i].children[0].children[2].children[1] //icon path
+		];
 		
-		hgame.name = results[i].children[0].children[0].children[0].value.trim().toLowerCase();
-		hgame.jp_name = results[i].children[0].children[0].children[0].value.trim().toLowerCase();
-		hgame.circle = results[i].children[0].children[1].children[0].value.trim().toLowerCase();
-		hgame.exe_path = results[i].children[0].children[2].children[0].value + "/" + results[i].children[0].children[3].value;
-		hgame.icon_path = results[i].children[0].children[2].children[1].value;
-		
-		hgame.tags = results[i].children[1].children[0].children[0].value.split("£");
-		
-		if(hgame.tags[0] === "")
+		for(let i2 = 0; i2 < elems.length; i2++)
 		{
-			hgame.tags = [];
+			if(elems[i2].value.trim() === "")
+			{
+				elems[i2].style.borderColor = "red";
+				valError = true;
+			}
+			else
+			{
+				elems[i2].style.borderColor = "white";
+			}
 		}
 		
-		hgames.push(hgame);
-		
-		let remove_btn = results[i].children[1].children[results[i].children[1].children.length - 1];
-		remove_btn.removeEventListener('click', removeResult);
-		remove_btn.classList.toggle("batch_result_btn_diabled");
 	}
 	
-	console.log(hgames);
-	
-	ipcRenderer.send('batchAddHgames', hgames);
-	
-	this.removeEventListener('click', submitBatch);
-	this.classList.remove("batch_submit");
-	this.classList.add("batch_submit_disabled");
+	if(valError === false)
+	{
+		console.log("shablah");
+		
+		for(let i = 0; i < results.length; i++)
+		{
+			let hgame = {};
+			
+			hgame.name = results[i].children[0].children[0].children[0].value.trim().toLowerCase();
+			hgame.jp_name = results[i].children[0].children[0].children[1].value.trim().toLowerCase();
+			hgame.circle = results[i].children[0].children[1].children[0].value.trim().toLowerCase();
+			hgame.exe_path = results[i].children[0].children[2].children[0].value.trim() + "/" + results[i].children[0].children[3].value;
+			hgame.icon_path = results[i].children[0].children[2].children[1].value;
+			
+			hgame.tags = results[i].children[1].children[0].children[0].value.split("£");
+			
+			if(hgame.tags[0] === "")
+			{
+				hgame.tags = [];
+			}
+			
+			hgames.push(hgame);
+			
+			let remove_btn = results[i].children[1].children[results[i].children[1].children.length - 1];
+			remove_btn.removeEventListener('click', removeResult);
+			remove_btn.classList.toggle("batch_result_btn_diabled");
+		}
+		
+		console.log(hgames);
+		
+		ipcRenderer.send('batchAddHgames', hgames);
+		
+		this.removeEventListener('click', submitBatch);
+		this.classList.remove("batch_submit");
+		this.classList.add("batch_submit_disabled");
+	}
 }
 
 function directory_dialog_batch()
@@ -94,7 +126,10 @@ function directory_dialog_batch()
 		if(args.status === "success")
 		{
 			console.log(args);
-			document.getElementById("batch_tbx").value = args.data;
+			if(args.data !== undefined)
+			{
+				document.getElementById("batch_tbx").value = args.data;
+			}
 		}
 		else
 		{
@@ -102,10 +137,9 @@ function directory_dialog_batch()
 			printError(args.message);
 		}
 		
-		document.getElementById("batch_dir_select").addEventListener('click', directory_dialog_batch);
 		let dialog_btn = document.getElementById("batch_dir_select");
+		dialog_btn.classList.remove("batch_btn_disabled");
 		dialog_btn.addEventListener('click', directory_dialog_batch);
-		dialog_btn.classList.toggle("batch_btn_disabled");
 		
 		ipcRenderer.removeListener('getFilePath_res', directory_dialog_res);
 	}
@@ -115,7 +149,7 @@ function directory_dialog_batch()
 	ipcRenderer.send('getFolderPath', "batch_dir");
 	
 	this.removeEventListener('click', directory_dialog_batch);
-	this.classList.toggle("batch_btn_disabled");
+	this.classList.add("batch_btn_disabled");
 }
 
 function file_dialog_batch()
