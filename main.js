@@ -183,11 +183,39 @@ function initialiseComms()
 		dialog.showOpenDialog(win, {properties: ['openDirectory']})
 		.then(function(result)
 		{
-			event.reply('getFolderPath_res', {status: "success", data: {type: args, val: result.filePaths[0]}});
+			event.reply('getFolderPath_res', {status: "success", data: result.filePaths[0]});
 		})
 		.catch(function(error)
 		{
-			event.reply('getFolderPath_res', {status: "error", message: error, type: args});
+			event.reply('getFolderPath_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('getFilePath', (event, args) => {
+		
+		console.log(args);
+		
+		dialog.showOpenDialog(win, {properties: []})
+		.then(function(result)
+		{
+			console.log(result);
+			event.reply('getFilePath_res', {status: "success", data: result.filePaths[0]});
+		})
+		.catch(function(error)
+		{
+			event.reply('getFilePath_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('batchAddHgames', (event, args) => {
+		addHgameBatch(args)
+		.then(function(result)
+		{
+			event.reply('batchAddHgames_res', {status: "success", data: result});
+		})
+		.catch(function(error)
+		{
+			event.reply('batchAddHgames_res', {status: "error", message: error});
 		});
 	});
 	
@@ -346,6 +374,152 @@ function addHgame(data)
 			
 			collection.circles[circle_index].hgames.push(Hgame);
 			
+			return saveJSON("collection.json", collection);
+		})
+		.then(function(result){
+			resolve(collection);
+		})
+		.catch(function(error){
+			reject(error);
+		});
+	});
+}
+
+function addHgameBatchRecursion(hgames, index)
+{
+	return new Promise((resolve, reject) => {
+		
+		let data = hgames[index];
+		
+		let circle_index = getCircleIndex(data.circle);
+		
+		if(circle_index === null)
+		{
+			circle_index = addCircle(data.circle);
+		}
+		
+		let existChecks = [
+			[data.name, "name"],
+			[data.jp_name, "jp_name"],
+			[data.exe_path, "exe_path"]
+		];
+		
+		let exists = false;
+		
+		for(let i = 0; i < existChecks.length; i++)
+		{
+			if(hgameExists(existChecks[i][0], existChecks[i][1]) === true)
+			{
+				exists = true;
+				break;
+			}
+		}
+		
+		if(exists === true)
+		{
+			if(index === hgames.length - 1)
+			{
+				console.log("skipped");
+				resolve("skipped");
+			}
+			else
+			{
+				addHgameBatchRecursion(hgames, index + 1)
+				.then(function(result){
+					resolve("skipped");
+				})
+				.catch(function(error){
+					reject(error);
+				});
+			}
+		}
+		else
+		{
+			let icon = data.icon_path;
+			
+			let iconCheck;
+			
+			if(validator.isURL(icon) === true)
+			{	
+				iconCheck = storage.download_file(icon, __dirname + "/temporary_files/");
+			}
+			else
+			{
+				iconCheck = new Promise((resolve, reject) => {resolve()});
+			}
+			
+			iconCheck
+			.then(function(result){
+				
+				let file_name = data.name.replaceAll('\\', '');
+				file_name = file_name.replaceAll('//', '');
+				file_name = file_name.replaceAll(':', '');
+				file_name = file_name.replaceAll('*', '');
+				file_name = file_name.replaceAll('?', '');
+				file_name = file_name.replaceAll('"', '');
+				file_name = file_name.replaceAll('<', '');
+				file_name = file_name.replaceAll('>', '');
+				file_name = file_name.replaceAll('|', '');
+				
+				if(result !== undefined)
+				{
+					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
+				}
+				else
+				{
+					if(icon.includes("./userdata/icons"))
+					{
+						icon = __dirname + "/" + icon;
+					}
+					
+					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
+				}
+			})
+			.then(function(result){
+				
+				result = "./userdata" + result.split('userdata').pop();
+				
+				let Hgame = {
+					name: data.name,
+					jp_name: data.jp_name,
+					exe_path: data.exe_path,
+					icon_path: result,
+					tags: data.tags,
+					favorite: false
+				};
+				
+				collection.circles[circle_index].hgames.push(Hgame);
+			})
+			.then(function(result){
+				
+				if(index === hgames.length - 1)
+				{
+					resolve("added");
+				}
+				else
+				{
+					addHgameBatchRecursion(hgames, index + 1)
+					.then(function(result){
+						resolve("added");
+					})
+					.catch(function(error){
+						reject(error);
+					});
+				}
+			})
+			.catch(function(error){
+				reject(error);
+			});
+		}
+	});
+}
+
+function addHgameBatch(data)
+{
+	return new Promise((resolve, reject) => {
+		
+		addHgameBatchRecursion(data, 0)
+		.then(function(result){
 			return saveJSON("collection.json", collection);
 		})
 		.then(function(result){

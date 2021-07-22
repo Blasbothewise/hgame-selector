@@ -10,7 +10,6 @@ function editHgame()
 {
 	let elems = [
 		document.getElementById("edit_name"),
-		document.getElementById("edit_jp_name"),
 		document.getElementById("edit_exe"),
 		document.getElementById("edit_icon"),
 		document.getElementById("edit_circle"),
@@ -211,7 +210,7 @@ function init_edit_Page()
 		console.log(this.files[0].path);
 		
 		document.getElementById("edit_icon").value = this.files[0].path;
-		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + this.files[0].path + '")';
+		document.getElementById("edit_icon_display").style.backgroundImage = 'url("' + this.files[0].path.replaceAll("\\", "/") + '")';
 		this.value = "";
 	});
 	

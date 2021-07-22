@@ -89,11 +89,13 @@ function populateHome(type, data)
 	{
 		container = document.getElementById("res_cntr_circles");
 		prev_container = document.getElementById("res_cntr_hgames");
+		document.getElementById("res_back_row").style.display = "none";
 	}
 	else
 	{
 		prev_container = document.getElementById("res_cntr_circles");
 		container = document.getElementById("res_cntr_hgames");
+		document.getElementById("res_back_row").style.display = "flex";
 	}
 	
 	while(container.firstChild)
@@ -180,5 +182,11 @@ function initialise_home()
 			
 			this.value = "";
 		}
+	});
+	
+	document.getElementById("res_back_btn").addEventListener("click", function(){
+		document.getElementById("res_cntr_hgames").style.display = "none";
+		document.getElementById("res_cntr_circles").style.display = "flex";
+		this.parentNode.style.display = "none";
 	});
 }

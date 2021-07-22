@@ -240,32 +240,23 @@ function initialise_comms()
 		{
 			console.log(args.message);
 			printError(args.message);
+			enable_batch_form();
 		}
 	});
 	
-	ipcRenderer.on('getFolderPath_res', (event, args) => {
+	ipcRenderer.on('batchAddHgames_res', (event, args) => {
 		if(args.status === "success")
 		{
 			console.log(args);
-			switch(args.data.type)
-			{
-				case "batch_dir":
-					console.log(args.data.val);
-					document.getElementById("batch_tbx").value = args.data.val;
-				break;
-			}
+			collection = args.data;
+			clear_batch_results();
+			populateHome("circles", { collection: collection });
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
-			
-			switch(args.type)
-			{
-				case "batch_dir":
-					
-				break;
-			}
+			enable_batch_results();
 		}
 	});
 }

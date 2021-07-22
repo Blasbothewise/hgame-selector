@@ -34,17 +34,17 @@ module.exports.getDLsiteFromDirName = function (folder_name)
 	
 	if(folder_name.includes("RJ"))
 	{
-		splits.push({type: "RJ", pot_id: folder_name.split("RJ").pop()});
+		splits.push({type: "RJ", pot_id: folder_name.split("RJ").pop().substring(0,6)});
 	}
 	
 	if(folder_name.includes("BJ"))
 	{
-		splits.push({type: "BJ", pot_id: folder_name.split("BJ").pop()});
+		splits.push({type: "BJ", pot_id: folder_name.split("BJ").pop().substring(0,6)});
 	}
 	
 	if(folder_name.includes("VJ"))
 	{
-		splits.push({type: "VJ", pot_id: folder_name.split("VJ").pop()});
+		splits.push({type: "VJ", pot_id: folder_name.split("VJ").pop().substring(0,6)});
 	}
 	
 	let winner;
@@ -60,11 +60,14 @@ module.exports.getDLsiteFromDirName = function (folder_name)
 	
 	if(winner === undefined)
 	{
+		console.log(folder_name);
+		console.log(splits[0]);
+		
 		return undefined;
 	}
 	else
 	{
-		console.log(winner);
+		//console.log(winner);
 		
 		switch(winner.type)
 		{

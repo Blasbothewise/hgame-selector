@@ -141,7 +141,7 @@ function scanForExecutable(directory)
 						{
 							exes.push(files[i]);
 						}
-						else if(files[i].split(".")[0] === files[i])
+						else if(fs.lstatSync(directory + "/" + files[i]).isDirectory())
 						{
 							directories.push(files[i]);
 						}

@@ -2,7 +2,6 @@ function addHgame()
 {
 	let elems = [
 		document.getElementById("add_name"),
-		document.getElementById("add_jp_name"),
 		document.getElementById("add_exe"),
 		document.getElementById("add_icon"),
 		document.getElementById("add_circle"),
@@ -374,7 +373,7 @@ function init_Add_Page()
 		console.log(this.files[0].path);
 		
 		document.getElementById("add_icon").value = this.files[0].path;
-		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + this.files[0].path + '")';
+		document.getElementById("add_icon_display").style.backgroundImage = 'url("' + this.files[0].path.replaceAll("\\", "/") + '")';
 		this.value = "";
 	});
 	
