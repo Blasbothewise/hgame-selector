@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, screen, ipcMain, dialog, shell} = require('electron')
 const json = require("electron-json-storage");
 require('dotenv').config();
 const scraper_importer = require('./classes/scraper_importer.js');
@@ -281,7 +281,7 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('downloadHgame_mega', (event, args) => {
-		downloadHgame_mega(args.url, args.filename, args.metadata)
+		downloadHgame_mega(args.url, args.filename, args.type, args.retry)
 		.then(function(result)
 		{
 			event.reply('downloadHgame_mega_res', {status: "success", data: result});
@@ -293,6 +293,8 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('get_download_progress_mega', (event, args) => {
+		
+		console.log(args);
 		
 		let download = archives.get_current_downloads(args);
 		
@@ -306,6 +308,17 @@ function initialiseComms()
 		}
 	});
 	
+	ipcMain.on('openPath', (event, args) => {
+		openPath(args.path, args.relative, args.file);
+	});
+	
+	ipcMain.on('cancelDownload', (event, args) => {
+		
+		archives.cancelDownload(args);
+		
+		event.reply('cancelDownload_res', {status: "success", data: args});
+	});
+	
 	scraper_importer.loginVNDB_basic()
 	.then(function(result){
 		console.log(result);
@@ -313,6 +326,8 @@ function initialiseComms()
 	.catch(function(error){
 		console.log(error);
 	});
+	
+	//archives.testIPFS();
 }
 
 function hgameExists(val, varName)
@@ -1043,22 +1058,45 @@ function searchMegaArchive(url, type, searchTerm)
 	});
 }
 
-function downloadHgame_mega(url, filename, metadata)
+function downloadHgame_mega(url, filename, type, retry)
 {
 	return new Promise((resolve, reject) => {
 		
 		console.log("starting download");
 		
-		if(archives.get_current_downloads(url) === undefined)
+		if(archives.get_current_downloads(url) === undefined || retry === true)
 		{
-			archives.megaDownload(url, __dirname + "/downloads/" + filename);
-			resolve(get_current_downloads(url));
+			switch(type)
+			{
+				case "mega":
+					archives.megaDownload(url, __dirname + "/downloads/" + filename);
+					resolve(get_current_downloads(url));
+			}
 		}
 		else
 		{
-			reject("Download already running.")
+			reject("Download already running or already downloaded.")
 		}
 	});
+}
+
+function openPath(path, relative, file)
+{
+	if(relative === true)
+	{
+		path = __dirname + "\\" + path;
+	}
+	
+	if(file === true)
+	{
+		shell.showItemInFolder(path);
+	}
+	else
+	{
+		shell.openPath(path);
+	}
+		
+	
 }
 
 function loadJSON(filename)

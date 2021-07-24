@@ -1,5 +1,6 @@
 const mega = require("megajs");
 const fs = require('fs');
+const storage = require("./storage.js");
 
 module.exports.validateMegaFolderUrl = function(url)
 {
@@ -72,7 +73,7 @@ function analyseMegaFolder(folder, url, type, searchTerm)
 	return files;
 }
 
-var megaDownloads = {};
+var downloads = {};
 
 module.exports.megaDownload = function(url, destination)
 {	
@@ -85,29 +86,76 @@ module.exports.megaDownload = function(url, destination)
 		}
 		else
 		{
-			megaDownloads[url] = {};
-			megaDownloads[url].status = "in progress";
-			megaDownloads[url].destination = destination;
-			megaDownloads[url].retrieved_bytes = 0;
+			downloads[url] = {};
+			downloads[url].status = "in progress";
+			downloads[url].destination = destination;
+			downloads[url].retrieved_bytes = 0;
+			downloads[url].cancel = false;
+			downloads[url].data = [];
 			
-			f.download()
+			//downloads[url].stream = fs.createWriteStream(destination);
+			
+			let d = f.download()
 			.on('close', () => {
 				console.log('mega download complete');
-				megaDownloads[url].status = "complete";
+				fs.writeFile(destination, Buffer.concat(downloads[url].data), (err) => {
+					if(err)
+					{
+						downloads[url].status = "failed";
+					}
+					else
+					{
+						downloads[url].status = "complete";
+					}
+				});
+				
 			})
 			.on('error', (err) => {
-				console.error(err);
+				//console.error(err);
+				if(downloads[url].status === "cancelled")
+				{
+					
+				}
+				else
+				{
+					downloads[url].status = "failed";
+				}
+
 			})
 			.on('data', (data) => {
-				megaDownloads[url].retrieved_bytes += data.length;
-				console.log(megaDownloads[url].retrieved_bytes);
-			})
-			.pipe(fs.createWriteStream(destination));
+				downloads[url].retrieved_bytes += data.length;
+				console.log(downloads[url].retrieved_bytes);
+				downloads[url].data.push(data);
+				
+				if(downloads[url].cancel === true)
+				{
+					downloads[url].status = "cancelled";
+					d.end();
+				}
+			});
 		}
 	});
 }
 
+module.exports.cancelDownload = function (url)
+{		
+	downloads[url].cancel = true;
+}
+
 module.exports.get_current_downloads = function(url)
 {
-	return megaDownloads[url];
+	return downloads[url];
+}
+
+module.exports.testIPFS = async function()
+{
+	console.log("IPFS test start");
+	
+	const ipfsclient = require("ipfs-http-client")
+	
+	const ipfs = new ipfsclient({host: 'localhost', port: '5001', protocol: 'http'});
+
+	const file = await ipfs.add(urlSource('https://ipfs.io/ipns/k2k4r8l7mxpi57sotykoy5f5ucakg0dr0ib0avmyjhwmofkvpfhfd510/bin.html'));
+
+	console.log(file);
 }

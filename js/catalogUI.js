@@ -151,12 +151,9 @@ function populateCatalog()
 	}
 }
 
-var downloads_count = 0;
-let downloads = {};
-
 function downloadHgameMega()
 {
-	if(downloads_count === 0)
+	if(downloads_count < 5)
 	{	
 		this.removeEventListener("click", downloadHgameMega);
 		this.classList.toggle("archive_result_btn_disabled");
@@ -175,10 +172,15 @@ function downloadHgameMega()
 				ipcRenderer.send('get_download_progress_mega', url);
 			}, 3000),
 			type: "mega",
-			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true)
+			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true),
+			image: this.parentNode.parentNode.getAttribute("icon"),
+			filename: this.parentNode.parentNode.getAttribute("filename"),
+			url: url
 		};
 		
-		ipcRenderer.send('downloadHgame_mega', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), metadata: metadata});
+		addDownload(downloads[url]);
+		
+		ipcRenderer.send('downloadHgame_mega', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: "mega", retry: false});
 		
 		downloads_count++;
 	}

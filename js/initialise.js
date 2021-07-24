@@ -308,27 +308,35 @@ function initialise_comms()
 		if(args.status === "success")
 		{
 			console.log(args);
-			
-			console.log("Download completion: " + bytes_to_readable(args.data.retrieved_bytes, false) + "/" + downloads[args.url].size)
-			
-			if(args.data.status === "complete")
-			{
-				clearInterval(downloads[args.url].interval);
-				downloads_count--;
-			}
+			updateDownload(args.data, args.url);
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
 			
-			clearInterval(download_intervals[args.url].interval);
-			downloads_count--;
+			updateDownload({retrieved_bytes: 0, status: "failed"}, args.url);
+		}
+	});
+	
+	ipcRenderer.on('cancelDownload_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log("url: ", args.url);
+			
+			removeDownload(args);
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			
+			enable_download_cancel(args);
 		}
 	});
 }
 
-let collection, catalog;
+var collection, catalog;
 
 function initialise()
 {

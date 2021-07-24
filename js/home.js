@@ -82,18 +82,28 @@ function populateHome(type, data)
 	
 	console.log(results);
 	
-	let removeContainer
+	
 	let container;
+	let previousContainer;
+	
+	let elems = document.getElementsByClassName("results_container");
+	
+	for(let i = 0; i < elems.length; i++)
+	{
+		if(elems[i].offsetParent !== null)
+		{
+			previousContainer = elems[i];
+			previousContainer.style.display = "none";
+			break;
+		}
+	}
 	
 	if(type === "circles")
 	{
 		container = document.getElementById("res_cntr_circles");
-		prev_container = document.getElementById("res_cntr_hgames");
-		document.getElementById("res_back_row").style.display = "none";
 	}
 	else
 	{
-		prev_container = document.getElementById("res_cntr_circles");
 		container = document.getElementById("res_cntr_hgames");
 		document.getElementById("res_back_row").style.display = "flex";
 	}
@@ -103,7 +113,8 @@ function populateHome(type, data)
 		container.removeChild(container.firstChild);
 	}
 	
-	let no_margin_index = 4;
+	let hgames = [];
+	let circles = [];
 	
 	for(let i = 0; i < results.length; i++)
 	{
@@ -134,6 +145,7 @@ function populateHome(type, data)
 					
 					changePage(document.getElementById("edit_tab"), "edit_page");
 				});
+				hgames.push(result);
 			break;
 			
 			case "circle":
@@ -143,26 +155,57 @@ function populateHome(type, data)
 				result.addEventListener('click', function(){				
 					populateHome("hgames_circle", {collection: col, target: results[i].name});
 				});
+				circles.push(result);
 			break;
-		}
-		
-		if(type === "search" && i > 0 && results[i - 1].type !== results[i].type)
-		{
-			//Do section split here.
-		}
-		else
-		{
-			if(i === no_margin_index)
-			{
-				result.style.marginLeft = "0px";
-				no_margin_index += 4;
-			}
-		}
-		
-		container.appendChild(result);	
+		}	
 	}
 	
-	prev_container.style.display = "none";
+	console.log(circles);
+	
+	if(hgames.length > 0)
+	{
+		let search_results_header = document.createElement("div");
+		search_results_header.classList.add("search_results_header");
+		search_results_header.innerHTML = "Hgames";
+		container.appendChild(search_results_header);
+		
+		let no_margin_index = 4;
+		
+		for(let i = 0; i < hgames.length; i++)
+		{			
+			if(i === no_margin_index)
+			{
+				hgames[i].style.marginLeft = "0px";
+				no_margin_index += 4;
+			}
+			
+			container.appendChild(hgames[i]);
+		}
+	}
+	
+	if(circles.length > 0)
+	{
+		let search_results_header = document.createElement("div");
+		search_results_header.classList.add("search_results_header");
+		search_results_header.innerHTML = "Circles";
+		container.appendChild(search_results_header);
+		
+		let no_margin_index = 4;
+		
+		for(let i = 0; i < circles.length; i++)
+		{
+			container.appendChild
+			
+			if(i === no_margin_index)
+			{
+				circles[i].style.marginLeft = "0px";
+				no_margin_index += 4;
+			}
+			
+			container.appendChild(circles[i]);
+		}
+	}
+	
 	container.style.display = "flex";
 }
 
@@ -185,6 +228,7 @@ function initialise_home()
 	});
 	
 	document.getElementById("res_back_btn").addEventListener("click", function(){
+		
 		document.getElementById("res_cntr_hgames").style.display = "none";
 		document.getElementById("res_cntr_circles").style.display = "flex";
 		this.parentNode.style.display = "none";

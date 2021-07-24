@@ -19,6 +19,7 @@
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
     "electron-json-storage": "^4.5.0",
+    "ipfs-http-client": "^50.1.2",
     "megajs": "^0.17.2",
     "normalize-url": "^6.0.1",
     "validator": "^13.6.0",
