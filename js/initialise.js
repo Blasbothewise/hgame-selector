@@ -330,7 +330,7 @@ function initialise_comms()
 		else
 		{
 			console.log(args.message);
-			//printError(args.message);
+			printError(args.message);
 			
 			updateDownload({retrieved_bytes: 0, status: "failed"}, args.url);
 		}

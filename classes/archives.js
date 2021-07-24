@@ -109,44 +109,44 @@ module.exports.megaDownload = function(url, destination)
 			
 			//downloads[url].stream = fs.createWriteStream(destination);
 			
-			let d = f.download()
-			.on('close', () => {
-				console.log('mega download complete');
-				fs.writeFile(destination, Buffer.concat(downloads[url].data), (err) => {
-					if(err)
+			try
+			{
+				let d = f.download()
+				.on('close', () => {
+					console.log('mega download complete');
+					downloads[url].status = "complete";
+				})
+				.on('error', (err) => {
+					console.error(err);
+					if(downloads[url].status === "cancelled")
 					{
-						downloads[url].status = "failed";
+						
 					}
 					else
 					{
-						downloads[url].status = "complete";
+						downloads[url].error = err;
+						downloads[url].status = "failed";
 					}
-				});
-				
-			})
-			.on('error', (err) => {
-				//console.error(err);
-				if(downloads[url].status === "cancelled")
-				{
-					
-				}
-				else
-				{
-					downloads[url].status = "failed";
-				}
 
-			})
-			.on('data', (data) => {
-				downloads[url].retrieved_bytes += data.length;
-				//console.log(downloads[url].retrieved_bytes);
-				downloads[url].data.push(data);
-				
-				if(downloads[url].cancel === true)
-				{
-					downloads[url].status = "cancelled";
-					d.end();
-				}
-			});
+				})
+				.on('data', (data) => {
+					downloads[url].retrieved_bytes += data.length;
+					//console.log(downloads[url].retrieved_bytes);
+					//downloads[url].data.push(data);
+					
+					if(downloads[url].cancel === true)
+					{
+						downloads[url].status = "cancelled";
+						d.end();
+					}
+				})
+				.pipe(fs.createWriteStream(destination));
+			}
+			catch(e)
+			{
+				console.log(e);
+				downloads[url].error = e;
+			}
 		}
 	});
 }

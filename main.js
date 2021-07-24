@@ -310,13 +310,20 @@ function initialiseComms()
 	ipcMain.on('get_download_progress_mega', (event, args) => {
 		let download = archives.get_current_downloads(args);
 		
-		if(download !== undefined)
+		if(download !== undefined || download.status != "failed")
 		{
 			event.reply('get_download_progress_mega_res', {status: "success", data: download, url: args});
 		}
 		else
 		{
-			event.reply('get_download_progress_mega_res', {status: "error", message: "Download does not exist", url: args});
+			let message = "Download does not exist";
+			
+			if(download.status === "failed")
+			{
+				message = download.error;
+			}
+			
+			event.reply('get_download_progress_mega_res', {status: "error", message: message, url: args});
 		}
 	});
 	
