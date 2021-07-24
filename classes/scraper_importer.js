@@ -277,7 +277,17 @@ module.exports.scrapeDLsite = function(url)
 			resolve(product);
 		})
 		.catch(function(error){
-			reject(error);
+			
+			console.log();
+			
+			if(error.isAxiosError)
+			{
+				resolve(undefined);
+			}
+			else
+			{
+				reject("something went wrong with scraping");
+			}
 		});
 	});
 }

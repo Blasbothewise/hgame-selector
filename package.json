@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build-windows": "electron-packager . --icon ./assets/icons/windows/laplace.ico --out ../temp/windows --overwrite",
-	"build-linux": "electron-packager . --icon=./assets/icons/linux/laplace.png --platform=linux arch=x64 --out=../temp/linux --overwrite"
+    "build-linux": "electron-packager . --icon=./assets/icons/linux/laplace.png --platform=linux arch=x64 --out=../temp/linux --overwrite"
   },
   "keywords": [],
   "author": "James Blackwell",
@@ -19,6 +19,7 @@
     "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
     "electron-json-storage": "^4.5.0",
+    "megajs": "^0.17.2",
     "normalize-url": "^6.0.1",
     "validator": "^13.6.0",
     "vndb-api": "^1.0.3",

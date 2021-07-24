@@ -61,8 +61,8 @@ module.exports.is_dlsite_prod_url = function(url)
 		"www.dlsite.com/maniax/work/=/product_id/",
 		"www.dlsite.com/pro/work/=/product_id/",
 		"www.dlsite.com/books/work/=/product_id/",
-		"www.dlsite.com/maniax/announce/=/product_id/"
-		"www.dlsite.com/pro/announce/=/product_id/"
+		"www.dlsite.com/maniax/announce/=/product_id/",
+		"www.dlsite.com/pro/announce/=/product_id/",
 		"www.dlsite.com/books/announce/=/product_id/"
 	];
 	

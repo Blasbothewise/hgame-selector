@@ -64,6 +64,44 @@ module.exports.download_file = function(url, destination)
 	});
 }
 
+var downloads = {};
+
+module.exports.download_file_background = function(url, destination)
+{
+	return new Promise((resolve, reject) => {			
+		
+		downloads[url].status = "in progress";
+		downloads[url].destination = destination;
+		
+		let filename = url.split('/').pop();
+		
+		https.get(url, (res) => {
+
+			let rawData = new Stream();
+			
+			res.on('data', (chunk) => { 
+				downloads[url].size += chunk.length;
+				rawData.push(chunk);
+			});
+			
+			res.on('end', () => {
+				fs.writeFileSync(destination + filename, rawData.read());
+				downloads[url].status = "complete";
+			});
+
+		}).on('error', (e) => {
+			downloads[url].status = "failed";
+		});
+	});
+	
+	resolve(downloads[url]);
+}
+
+module.exports.get_current_downloads = function(url)
+{
+	return downloads[url];
+}
+
 module.exports.delete_files = function delete_files(files){
 	return delete_file(files, 0);
 }

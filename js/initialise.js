@@ -259,9 +259,76 @@ function initialise_comms()
 			enable_batch_results();
 		}
 	});
+	
+	ipcRenderer.on('addMegaArchive_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			
+			catalog = args.data;
+			addMegaArchivePage(catalog.mega.archives[catalog.mega.archives.length - 1]);
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+		}
+	});
+	
+	ipcRenderer.on('getCatalog_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			catalog = args.data
+			populateCatalog();
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+		}
+	});
+	
+	ipcRenderer.on('searchMegaArchive_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			populate_mega_archive(args.data, args.container);
+			enableSearch_form_mega();
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			enableSearch_form_mega();
+		}
+	});
+	
+	ipcRenderer.on('get_download_progress_mega_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			
+			console.log("Download completion: " + bytes_to_readable(args.data.retrieved_bytes, false) + "/" + downloads[args.url].size)
+			
+			if(args.data.status === "complete")
+			{
+				clearInterval(downloads[args.url].interval);
+				downloads_count--;
+			}
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			
+			clearInterval(download_intervals[args.url].interval);
+			downloads_count--;
+		}
+	});
 }
 
-let collection;
+let collection, catalog;
 
 function initialise()
 {
@@ -270,8 +337,10 @@ function initialise()
 	init_Add_Page();
 	init_edit_Page();
 	init_batch_Page();
+	init_catalog_page();
 	
 	ipcRenderer.send('getCollection', undefined);
+	ipcRenderer.send('getCatalog', undefined);
 	
 	let tabs = document.getElementsByClassName("tab");
 

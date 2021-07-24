@@ -46,7 +46,6 @@ function clear_batch_results()
 	sub.removeEventListener('click', submitBatch);
 	sub.classList.remove("batch_submit");
 	sub.classList.add("batch_submit_disabled");
-
 }
 
 function submitBatch()
@@ -83,7 +82,6 @@ function submitBatch()
 	
 	if(valError === false)
 	{
-		console.log("shablah");
 		
 		for(let i = 0; i < results.length; i++)
 		{

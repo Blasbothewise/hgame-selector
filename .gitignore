@@ -107,3 +107,7 @@ dist
 
 userdata/icons/
 userdata/collection.json
+
+#downloads
+
+downloads/

@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  -->
-<!--  Last Published: Thu Jul 22 2021 16:39:26 GMT+0000 (Coordinated Universal Time)  -->
+<!--  Last Published: Sat Jul 24 2021 01:18:21 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="60f46555aeb557937ba1509f" data-wf-site="60ef2eb312b1833cde8808a3">
 <head>
   <meta charset="utf-8">
@@ -98,6 +98,42 @@
   background-size: contain;
   background-repeat: no-repeat
 }
+.archive_page::-webkit-scrollbar 
+{
+	background: #212121;
+  width: 1vw;
+  height: 0px;
+}
+.archive_page::-webkit-scrollbar-thumb 
+{
+	background: #4a4950; 
+  border-radius: 1vw;
+}
+.archive_page
+{
+	overflow-x: hidden;
+}
+.archive_res_icon
+{
+	background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat
+}
+.archive_res_col_3::-webkit-scrollbar 
+{
+	background: #212121;
+  width: 1vw;
+  height: 0px;
+}
+.archive_res_col_3::-webkit-scrollbar-thumb 
+{
+	background: #4a4950; 
+  border-radius: 1vw;
+}
+.archive_res_col_3
+{
+	overflow-x: hidden;
+}
 </style>
 </head>
 <body class="body">
@@ -106,10 +142,11 @@
     <div id="add_tab" page_id="add_page" class="tab">Add Hgame</div>
     <div id="edit_tab" page_id="edit_page" class="tab">Edit Hgame</div>
     <div id="batch_tab" page_id="batch_page" class="tab">Batch add</div>
+    <div id="catalog_tab" page_id="catalog_page" class="tab">Catalog</div>
   </div>
   <div id="home_page" class="page_container">
-    <div class="page_search_row">
-      <div class="page_search_tbx_cntr w-embed"><input class="search_tbx" id="search_val" placeholder="search"></div>
+    <div class="search_row">
+      <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="search_val" placeholder="search"></div>
       <div id="search_submit" class="page_search_btn">search</div>
     </div>
     <div id="res_back_row" class="results_back_row">
@@ -119,7 +156,7 @@
     <div id="res_cntr_hgames" class="results_container hidden"></div>
   </div>
   <div id="add_page" class="page_container hidden">
-    <div class="add_edit_header">Add a new hentai game</div>
+    <div class="header">Add a new hentai game</div>
     <div class="add_edit_form_sect">
       <div class="add_edit_form_cntr">
         <div class="add_edit_input">
@@ -192,7 +229,7 @@
     <div id="add_submit" class="add_edit_button">Submit</div>
   </div>
   <div id="edit_page" class="page_container hidden">
-    <div class="add_edit_header">Edit or remove a hentai game</div>
+    <div class="header">Edit or remove a hentai game</div>
     <div class="add_edit_form_sect">
       <div class="add_edit_form_cntr">
         <div class="add_edit_input">
@@ -275,7 +312,7 @@
     <div id="remove_submit" class="add_edit_button_disabled">Remove</div>
   </div>
   <div id="batch_page" class="page_container hidden">
-    <div class="add_edit_header">Scan to add multiple hgames</div>
+    <div class="header">Scan to add multiple hgames</div>
     <div class="batch_opt_row">
       <div class="batch_label">Scan for games</div>
       <div class="batch_tbx_cntr w-embed"><input class="batch_tbx" id="batch_tbx" disabled="" placeholder="games directory">
@@ -289,6 +326,35 @@
     <div id="batch_results_cntr" class="batch_results_cntr"></div>
     <div id="batch_submit" class="batch_submit_disabled">Add hgames</div>
   </div>
+  <div id="catalog_page" class="page_container hidden">
+    <div class="header">Browse hgames from community archives</div>
+    <div id="tabsbar" class="tabs_menu_catalogs">
+      <div id="catalog_tab_mega" page_id="catelog_mega" class="tab_catalog current">Mega.nz</div>
+    </div>
+    <div id="catelog_mega" class="catalog_page">
+      <div id="tabs_mega" class="tbs_mnu_catalog_sub">
+        <div id="add_archive_mega" class="tab_mega add">add archive</div>
+      </div>
+      <div id="mega_search_cntr" class="search_row_catelog">
+        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="mega_search_tbx" placeholder="search archive"></div>
+        <div class="search_combo_cntr w-embed"><select class="search_combo" id="mega_search_combo">
+            <option value="date">date added</option>
+            <option value="name">name</option>
+          </select></div>
+        <div id="mega_search_submit" class="page_search_btn">search</div>
+        <div id="mega_get_all" class="page_search_btn">get all</div>
+      </div>
+    </div>
+    <div id="add_archive_mega_box" class="archive_add">
+      <div class="archive_add_header">Add mega archive</div>
+      <div class="add_archive_row">
+        <div class="add_archive_tbx_cntr w-embed"><input class="tbx" id="add_mega_tbx_url" placeholder="mega url"></div>
+        <div class="add_archive_tbx_cntr_name w-embed"><input class="tbx" id="add_mega_tbx_name" placeholder="archive name"></div>
+        <div id="add_archive_mega_submit" class="add_archive_btn">add</div>
+        <div id="add_mega_close" class="add_archive_btn">close</div>
+      </div>
+    </div>
+  </div>
   <div id="error_box" class="error_box"></div>
   <script src="https://d3e54v103j8qbb.cloudfront.net/js/jquery-3.5.1.min.dc5e7f18c8.js?site=60ef2eb312b1833cde8808a3" type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="js/webflow.js" type="text/javascript"></script>
@@ -296,6 +362,7 @@
   <script type="text/javascript" src="js/editUI.js"></script>
   <script type="text/javascript" src="js/addUI.js"></script>
   <script type="text/javascript" src="js/batchUI.js"></script>
+  <script type="text/javascript" src="js/catalogUI.js"></script>
   <script type="text/javascript" src="js/home.js"></script>
   <script type="text/javascript" src="js/initialise.js"></script>
 </body>

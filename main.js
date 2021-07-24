@@ -6,6 +6,7 @@ const storage = require('./classes/storage.js');
 const validator = require("validator");
 const child = require('child_process').execFile;
 const fs = require('fs');
+const archives = require('./classes/archives.js');
 
 var win;
 
@@ -28,7 +29,7 @@ function createWindow () {
 	});
 }
 
-var collection, config;
+var collection, catalog, config;
 
 function initialiseApp()
 {
@@ -37,6 +38,11 @@ function initialiseApp()
 	if(!fs.existsSync(__dirname + "/temporary_files"))
 	{
 		fs.mkdirSync(__dirname + "/temporary_files");
+	}
+	
+	if(!fs.existsSync(__dirname + "/downloads"))
+	{
+		fs.mkdirSync(__dirname + "/downloads");
 	}
 	
 	if(!fs.existsSync(__dirname + "/userdata"))
@@ -52,7 +58,7 @@ function initialiseApp()
 	json.setDataPath(app.getAppPath() + "\\userdata");
 	console.log(json.getDataPath());
 	
-	loadJSON_Batch(["collection.json", "config.json"])
+	loadJSON_Batch(["collection.json", "config.json", "catalog.json"])
 	.then(function(result){
 		
 		collection = result.collection.json;
@@ -62,7 +68,34 @@ function initialiseApp()
 			collection.circles = [];
 		}
 		
+		catalog = result.catalog.json;
+		
+		if(catalog.mega === undefined)
+		{
+			catalog.mega = {};
+		}
+		
+		if(catalog.mega.archives == undefined)
+		{
+			catalog.mega.archives = [{
+				name: "/mggg/",
+				url: "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
+			}];
+		}
+		
+		if(catalog.ipfs === undefined)
+		{
+			catalog.ipfs = {};
+		}
+		
+		if(catalog.ipfs.archives == undefined)
+		{
+			catalog.ipfs.archives = [];
+		}
+		
 		config = result.config.json;
+		
+		saveJSON("catalog.json", catalog);
 	})
 	.catch(function(error){
 		console.log(error);
@@ -217,6 +250,60 @@ function initialiseComms()
 		{
 			event.reply('batchAddHgames_res', {status: "error", message: error});
 		});
+	});
+	
+	ipcMain.on('addMegaArchive', (event, args) => {
+		addMegaArchive(args.url, args.name)
+		.then(function(result)
+		{
+			event.reply('addMegaArchive_res', {status: "success", data: result});
+		})
+		.catch(function(error)
+		{
+			event.reply('addMegaArchive_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('getCatalog', (event, args) => {
+		event.reply('getCatalog_res', {status: "success", data: catalog});
+	});
+	
+	ipcMain.on('searchMegaArchive', (event, args) => {
+		searchMegaArchive(args.url, args.type, args.searchTerm)
+		.then(function(result)
+		{
+			event.reply('searchMegaArchive_res', {status: "success", data: result, container: args.container});
+		})
+		.catch(function(error)
+		{
+			event.reply('searchMegaArchive_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('downloadHgame_mega', (event, args) => {
+		downloadHgame_mega(args.url, args.filename, args.metadata)
+		.then(function(result)
+		{
+			event.reply('downloadHgame_mega_res', {status: "success", data: result});
+		})
+		.catch(function(error)
+		{
+			event.reply('downloadHgame_mega_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('get_download_progress_mega', (event, args) => {
+		
+		let download = archives.get_current_downloads(args);
+		
+		if(download !== undefined)
+		{
+			event.reply('get_download_progress_mega_res', {status: "success", data: download, url: args});
+		}
+		else
+		{
+			event.reply('get_download_progress_mega_res', {status: "error", message: "Download does not exist", url: args});
+		}
 	});
 	
 	scraper_importer.loginVNDB_basic()
@@ -779,7 +866,7 @@ function scanForHgames(directory)
 				}
 				else
 				{
-					crape_imports.push(new Promise((resolve, reject) => {resolve()}))
+					scrape_imports.push(new Promise((resolve, reject) => {resolve()}))
 				}
 			}
 			
@@ -816,6 +903,161 @@ function scanForHgames(directory)
 			reject(error);
 		});
 		
+	});
+}
+
+function archive_exists(type, val, varName)
+{
+	let cat_set;
+	
+	switch(type)
+	{
+		case "mega":
+			cat_set = catalog.mega;
+		break;
+		
+		case "ipfs":
+			cat_set = catalog.ipfs;
+		break;
+	}
+	
+	console.log(cat_set);
+	
+	for(let i = 0; i < cat_set.archives.length; i++)
+	{
+		console.log(val);
+		console.log(cat_set.archives[i][varName]);
+		
+		if(cat_set.archives[i][varName] === val)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+function addMegaArchive(url, name)
+{
+	return new Promise((resolve, reject) => {
+		let existChecks = [
+			[url, "url"]
+		];
+		
+		let exists = false;
+		
+		for(let i = 0; i < existChecks.length; i++)
+		{
+			if(archive_exists("mega", existChecks[i][0], existChecks[i][1]) === true)
+			{
+				exists = true;
+				break;
+			}
+		}
+		
+		if(exists === true)
+		{
+			reject("Archive already added");
+		}
+		else
+		{
+			archives.validateMegaFolderUrl(url)
+			.then(function(result){
+				catalog.mega.archives.push({
+					name: name,
+					url: url
+				});
+				return saveJSON("catalog.json", catalog);
+			})
+			.then(function(result){
+				resolve(catalog);
+			})
+			.catch(function(error){
+				console.log(error);
+			});
+		}
+	});
+}
+
+function searchMegaArchive(url, type, searchTerm)
+{
+	return new Promise((resolve, reject) => {
+		
+		let applications = [];
+		let res = [];
+		
+		archives.megaCatalog(url, type, searchTerm)
+		.then(function(result){			
+			for(let i = 0; i < result.length; i++)
+			{
+				let dlsite_url = scraper_importer.getDLsiteFromDirName(result[i].name);
+				
+				if(dlsite_url !== undefined)
+				{
+					result[i].type = "dlsite";
+					result[i].dlsite_url = dlsite_url;
+					res.push(result[i]);
+				}
+			}
+			
+			let scrape_imports = [];
+			
+			for(let i = 0; i < res.length; i++)
+			{
+				if(res[i].type === "dlsite")
+				{
+					scrape_imports.push(scraper_importer.scrapeDLsite(res[i].dlsite_url));
+				}
+				else
+				{
+					scrape_imports.push(new Promise((resolve, reject) => {resolve()}))
+				}
+			}
+			
+			return Promise.all(scrape_imports);
+		})
+		.then(function(results){	
+			for(let i = 0; i < results.length; i++)
+			{
+				if(results[i] === undefined)
+				{
+					
+				}
+				else
+				{
+					let application = {
+						app: res[i],
+						import_scrape: results[i]
+					};
+					
+					applications.push(application);
+				}
+			}
+			
+			resolve(applications);
+		})
+		.catch(function(error){
+			console.log(error);
+			reject(error);
+		});
+	});
+}
+
+function downloadHgame_mega(url, filename, metadata)
+{
+	return new Promise((resolve, reject) => {
+		
+		console.log("starting download");
+		
+		if(archives.get_current_downloads(url) === undefined)
+		{
+			archives.megaDownload(url, __dirname + "/downloads/" + filename);
+			resolve(get_current_downloads(url));
+		}
+		else
+		{
+			reject("Download already running.")
+		}
 	});
 }
 
