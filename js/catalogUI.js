@@ -131,8 +131,6 @@ function populateCatalog()
 			archive_page.classList.add("archive_page");
 			archive_page.id = "archive_" + catalog.mega.archives[i].name;
 			
-			enable_mega_add_archive();
-			
 			if(i === 0)
 			{
 				tab_mega.classList.add("current");
@@ -153,11 +151,22 @@ function populateCatalog()
 
 function downloadHgameMega()
 {
-	if(downloads_count < 5)
+	if(downloads[this.parentNode.parentNode.getAttribute("url")] !== undefined)
+	{
+		printError("Already downloading.");
+	}
+	else if(downloads_count < 4)
 	{	
 		this.removeEventListener("click", downloadHgameMega);
 		this.classList.toggle("archive_result_btn_disabled");
 		
+		let elem = this;
+		
+		let enable = setInterval(function(){
+			elem.addEventListener("click", downloadHgameMega);
+			elem.classList.toggle("archive_result_btn_disabled");
+			clearInterval(enable);
+		}, 10000)
 		
 		let url = this.parentNode.parentNode.getAttribute("url");
 		let metadata = {
@@ -320,7 +329,20 @@ function disableSearch_form_mega()
 
 function search_archive_mega()
 {
+	disableSearch_form_mega();
 	
+	let archive;
+	
+	for(let i = 0; i < catalog.mega.archives.length; i++)
+	{
+		if(document.getElementsByClassName("tab_mega current")[0].innerHTML === catalog.mega.archives[i].name)
+		{
+			archive = catalog.mega.archives[i];
+			break;
+		}
+	}
+	
+	ipcRenderer.send('searchMegaArchive', {url: archive.url, type: "search", searchTerm: document.getElementById("mega_search_tbx").value.trim(), container: "archive_" + archive.name});
 }
 
 function getAll_archive_res_mega()
@@ -367,6 +389,13 @@ function init_catalog_page()
 	
 	document.getElementById("add_archive_mega").addEventListener("click", function(){
 		document.getElementById("add_archive_mega_box").style.display = "flex";
+	});
+	
+	document.getElementById("mega_search_tbx").addEventListener('keypress', function(event){
+		if(event.key === 'Enter')
+		{
+			search_archive_mega();
+		}
 	});
 	
 	document.getElementById("mega_search_submit").addEventListener('click', search_archive_mega);

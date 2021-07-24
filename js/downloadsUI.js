@@ -35,14 +35,19 @@ function addDownload(download)
 		download_btn_install.classList.add("hidden");
 		download_btn_install.innerHTML = "install";
 		
-		//download_btn_install.addEventListener('click', );
+		let download_success = document.createElement("div");
+		download_success.classList.add("download_success");
+		download_success.classList.add("hidden");
+		download_success.innerHTML = "Complete";
 		
 		let download_btn_open = document.createElement("div");
 		download_btn_open.classList.add("download_btn");
 		download_btn_open.classList.add("hidden");
 		download_btn_open.innerHTML = "open";
+		
+		console.log(config.downloads_path + "\\" + download.filename);
 		download_btn_open.addEventListener('click', function(){
-			ipcRenderer.send('openPath', {path: "downloads\\" + download.filename, relative: true, file: true});
+			ipcRenderer.send('openPath', {path: config.downloads_path + "\\" + download.filename, relative: false, file: true});
 		});
 		
 		let download_btn_close = document.createElement("div");
@@ -60,7 +65,7 @@ function addDownload(download)
 		download_btn_retry.classList.add("download_btn");
 		download_btn_retry.classList.add("hidden");
 		download_btn_retry.innerHTML = "retry";
-		download_btn_open.addEventListener('click', retry_download_mega);
+		download_btn_retry.addEventListener('click', retry_download_mega);
 		
 		let download_btn_close_2 = document.createElement("div");
 		download_btn_close_2.classList.add("download_btn");
@@ -73,7 +78,7 @@ function addDownload(download)
 	download_elem.appendChild(download_col_2);
 	download_elem.appendChild(download_col_3);
 	download_elem.appendChild(download_btn_cancel);
-	download_elem.appendChild(download_btn_install);
+	download_elem.appendChild(download_success);
 	download_elem.appendChild(download_btn_open);
 	download_elem.appendChild(download_btn_close);
 	download_elem.appendChild(download_failed);
@@ -165,9 +170,16 @@ function updateDownload(data, url)
 
 function retry_download_mega()
 {
-	downloads[this.parentNode.id].interval = setInterval(function(){
-		ipcRenderer.send('get_download_progress_mega', url);
-	}, 3000);
+	elem = this.parentNode;
 	
-	ipcRenderer.send('downloadHgame_mega', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: "mega", retry: true});
+	downloads[elem.id].interval = setInterval(function(){
+		ipcRenderer.send('get_download_progress_mega', elem.id);
+	}, 1000);
+	
+	elem.children[4].style.display = "flex"; //Show cancel button
+	elem.children[8].classList.add("hidden"); //Hide failed label
+	elem.children[9].classList.add("hidden"); //Hide retry button
+	elem.children[10].classList.add("hidden"); //Hide second close button
+	
+	ipcRenderer.send('downloadHgame_mega', {url: elem.id, filename: downloads[elem.id].filename, type: "mega", retry: true});
 }

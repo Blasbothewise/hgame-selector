@@ -45,6 +45,11 @@ function initialiseApp()
 		fs.mkdirSync(__dirname + "/downloads");
 	}
 	
+	if(!fs.existsSync(__dirname + "/install"))
+	{
+		fs.mkdirSync(__dirname + "/install");
+	}
+	
 	if(!fs.existsSync(__dirname + "/userdata"))
 	{
 		fs.mkdirSync(__dirname + "/userdata");
@@ -95,7 +100,18 @@ function initialiseApp()
 		
 		config = result.config.json;
 		
+		//if(config.install_path === undefined)
+		//{
+		//	config.install_path = __dirname + "/install";
+		//}
+		
+		if(config.downloads_path === undefined)
+		{
+			config.downloads_path = __dirname + "/downloads";
+		}
+		
 		saveJSON("catalog.json", catalog);
+		saveJSON("config.json", config);
 	})
 	.catch(function(error){
 		console.log(error);
@@ -216,22 +232,18 @@ function initialiseComms()
 		dialog.showOpenDialog(win, {properties: ['openDirectory']})
 		.then(function(result)
 		{
-			event.reply('getFolderPath_res', {status: "success", data: result.filePaths[0]});
+			event.reply('getFolderPath_res', {status: "success", data: result.filePaths[0], tbx: args});
 		})
 		.catch(function(error)
 		{
-			event.reply('getFolderPath_res', {status: "error", message: error});
+			event.reply('getFolderPath_res', {status: "error", message: error, tbx: args});
 		});
 	});
 	
 	ipcMain.on('getFilePath', (event, args) => {
-		
-		console.log(args);
-		
 		dialog.showOpenDialog(win, {properties: []})
 		.then(function(result)
 		{
-			console.log(result);
 			event.reply('getFilePath_res', {status: "success", data: result.filePaths[0]});
 		})
 		.catch(function(error)
@@ -269,6 +281,9 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('searchMegaArchive', (event, args) => {
+		
+		console.log(args);
+		
 		searchMegaArchive(args.url, args.type, args.searchTerm)
 		.then(function(result)
 		{
@@ -293,9 +308,6 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('get_download_progress_mega', (event, args) => {
-		
-		console.log(args);
-		
 		let download = archives.get_current_downloads(args);
 		
 		if(download !== undefined)
@@ -317,6 +329,22 @@ function initialiseComms()
 		archives.cancelDownload(args);
 		
 		event.reply('cancelDownload_res', {status: "success", data: args});
+	});
+	
+	ipcMain.on('setConfig', (event, args) => {
+		setConfig(args)
+		.then(function(result)
+		{
+			event.reply('setConfig_res', {status: "success", data: result});
+		})
+		.catch(function(error)
+		{
+			event.reply('setConfig_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('getConfig', (event, args) => {
+		event.reply('getConfig_res', {status: "success", data: config});
 	});
 	
 	scraper_importer.loginVNDB_basic()
@@ -664,8 +692,6 @@ function editHgame(data)
 		
 		let old_icon = collection.circles[data.circle_index].hgames[data.hgame_index].icon_path;
 		
-		console.log("boog");
-		
 		collection.circles[data.circle_index].hgames.splice(data.hgame_index, 1); // remove prev record
 		
 		let circle_index = getCircleIndex(data.hgame.circle);
@@ -804,15 +830,23 @@ function searchCollection(searchTerm)
 		{
 			result.circles.push(collection.circles[i]);
 		}
-	}
-	
-	for(let i = 0; i < collection.circles.length; i++)
-	{
+		
 		if(collection.circles[i].hgames.length > 0)
 		{
 			for(let i2 = 0; i2 < collection.circles[i].hgames.length; i2++)
 			{
-				if(collection.circles[i].hgames[i2].name.includes(searchTerm))
+				let tag_match = false;
+				
+				for(let i3 = 0; i3 < collection.circles[i].hgames[i2].tags.length; i3++)
+				{
+					if(collection.circles[i].hgames[i2].tags[i3].toLowerCase() === searchTerm)
+					{	
+						tag_match = true;
+						break;
+					}
+				}
+				
+				if(collection.circles[i].hgames[i2].name.includes(searchTerm) || tag_match === true)
 				{
 					result.hgames.push(collection.circles[i].hgames[i2]);
 				}
@@ -935,8 +969,6 @@ function archive_exists(type, val, varName)
 			cat_set = catalog.ipfs;
 		break;
 	}
-	
-	console.log(cat_set);
 	
 	for(let i = 0; i < cat_set.archives.length; i++)
 	{
@@ -1069,7 +1101,7 @@ function downloadHgame_mega(url, filename, type, retry)
 			switch(type)
 			{
 				case "mega":
-					archives.megaDownload(url, __dirname + "/downloads/" + filename);
+					archives.megaDownload(url, config.downloads_path + "/" + filename);
 					resolve(get_current_downloads(url));
 			}
 		}
@@ -1082,6 +1114,8 @@ function downloadHgame_mega(url, filename, type, retry)
 
 function openPath(path, relative, file)
 {
+	console.log(path);
+	
 	if(relative === true)
 	{
 		path = __dirname + "\\" + path;
@@ -1095,8 +1129,31 @@ function openPath(path, relative, file)
 	{
 		shell.openPath(path);
 	}
+}
+
+function setConfig(conf)
+{
+	return new Promise((resolve, reject) => {
+		if(!fs.existsSync(conf.downloads_path))
+		{
+			reject("Downloads path invalid.");
+		}
 		
-	
+		//if(!fs.existsSync(conf.install_path))
+		//{
+		//	reject("Install path invalid.");
+		//}
+		
+		config = conf;
+		
+		saveJSON("config.json", config)
+		.then(function(result){
+			resolve(config);
+		})
+		.catch(function(error){
+			reject(error);
+		});
+	});
 }
 
 function loadJSON(filename)

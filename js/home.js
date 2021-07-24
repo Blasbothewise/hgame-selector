@@ -43,7 +43,18 @@ function populateHome(type, data)
 				{
 					for(let i2 = 0; i2 < col.circles[i].hgames.length; i2++)
 					{
-						if(col.circles[i].hgames[i2].name.includes(data.searchTerm))
+						let tag_match = false;
+				
+						for(let i3 = 0; i3 < col.circles[i].hgames[i2].tags.length; i3++)
+						{
+							if(col.circles[i].hgames[i2].tags[i3].toLowerCase() === data.searchTerm)
+							{
+								tag_match = true;
+								break;
+							}
+						}
+						
+						if(col.circles[i].hgames[i2].name.includes(data.searchTerm) || tag_match === true)
 						{							
 							results_buffer.push({
 								name: col.circles[i].hgames[i2].name,
@@ -220,7 +231,7 @@ function initialise_home()
 	document.getElementById("search_val").addEventListener('keypress', function(event){
 		if(event.key === 'Enter')
 		{
-			populateHome("search",{collection: collection, searchTerm: document.getElementById("search_val").value.trim()});
+			populateHome("search",{collection: collection, searchTerm: document.getElementById("search_val").value.trim().toLowerCase()});
 			//ipcRenderer.send('searchCollection', {searchTerm: document.getElementById("search_val").value.trim()});
 			
 			this.value = "";

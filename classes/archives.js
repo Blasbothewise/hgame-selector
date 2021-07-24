@@ -53,7 +53,8 @@ function analyseMegaFolder(folder, url, type, searchTerm)
 	{
 		if(folder.children[i].directory === true)
 		{
-			files = files.concat(analyseMegaFolder(folder.children[i]));
+			files = files.concat(analyseMegaFolder(folder.children[i], url, type, searchTerm));
+			
 		}
 		else
 		{
@@ -65,6 +66,19 @@ function analyseMegaFolder(folder, url, type, searchTerm)
 						link: url + "/file/" + folder.children[i].downloadId[1],
 						size: folder.children[i].size, //size in bytes
 					});
+				break;
+				
+				case "search":
+				
+					if(folder.children[i].name.toLowerCase().includes(searchTerm.toLowerCase()))
+					{
+						files.push({
+							name: folder.children[i].name,
+							link: url + "/file/" + folder.children[i].downloadId[1],
+							size: folder.children[i].size, //size in bytes
+						});
+					}
+				
 				break;
 			}
 		}
@@ -124,7 +138,7 @@ module.exports.megaDownload = function(url, destination)
 			})
 			.on('data', (data) => {
 				downloads[url].retrieved_bytes += data.length;
-				console.log(downloads[url].retrieved_bytes);
+				//console.log(downloads[url].retrieved_bytes);
 				downloads[url].data.push(data);
 				
 				if(downloads[url].cancel === true)

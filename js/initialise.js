@@ -95,11 +95,28 @@ function printError(message)
 	
 	let interval = setInterval(function(){
 		
-		error_box.style.transition = "visbility 2s, opacity 0.5s linear";
+		error_box.style.transition = "visbility 5s, opacity 0.5s linear";
 		error_box.style.display = "none";
 		error_box.innerHTML = "";
 		clearInterval(interval);
-	}, 2000);
+	}, 5000);
+}
+
+function printSuccess(message)
+{
+	let success_box = document.getElementById("success_box");
+	
+	success_box.style.transition = null;
+	success_box.style.display = "flex";
+	success_box.innerHTML = message;
+	
+	let interval = setInterval(function(){
+		
+		success_box.style.transition = "visbility 5s, opacity 0.5s linear";
+		success_box.style.display = "none";
+		success_box.innerHTML = "";
+		clearInterval(interval);
+	}, 5000);
 }
 
 const { ipcRenderer } = require('electron');
@@ -313,7 +330,7 @@ function initialise_comms()
 		else
 		{
 			console.log(args.message);
-			printError(args.message);
+			//printError(args.message);
 			
 			updateDownload({retrieved_bytes: 0, status: "failed"}, args.url);
 		}
@@ -334,9 +351,40 @@ function initialise_comms()
 			enable_download_cancel(args);
 		}
 	});
+	
+	ipcRenderer.on('setConfig_res', (event, args) => {
+		if(args.status === "success")
+		{
+			config = args.data;
+			populate_config(config);
+			printSuccess("Configuration saved");
+			enableConfigForm();
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			
+			enableConfigForm();
+		}
+	});
+	
+	ipcRenderer.on('getConfig_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			config = args.data
+			populate_config(config);
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+		}
+	});
 }
 
-var collection, catalog;
+var collection, catalog, config;
 
 function initialise()
 {
@@ -346,9 +394,11 @@ function initialise()
 	init_edit_Page();
 	init_batch_Page();
 	init_catalog_page();
+	init_config();
 	
 	ipcRenderer.send('getCollection', undefined);
 	ipcRenderer.send('getCatalog', undefined);
+	ipcRenderer.send('getConfig', undefined);
 	
 	let tabs = document.getElementsByClassName("tab");
 
