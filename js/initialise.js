@@ -382,6 +382,22 @@ function initialise_comms()
 			printError(args.message);
 		}
 	});
+	
+	ipcRenderer.on('removeMegaArchive_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			catalog = args.data
+			removeMegaArchivePage(args.url, args.name);
+			enableRemoveArchive();
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
+			enableRemoveArchive();
+		}
+	});
 }
 
 var collection, catalog, config;

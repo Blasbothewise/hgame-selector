@@ -354,6 +354,18 @@ function initialiseComms()
 		event.reply('getConfig_res', {status: "success", data: config});
 	});
 	
+	ipcMain.on('removeMegaArchive', (event, args) => {
+		removeMegaArchive(args.url, args.name)
+		.then(function(result)
+		{
+			event.reply('removeMegaArchive_res', {status: "success", data: result, url: args.url, name: args.name});
+		})
+		.catch(function(error)
+		{
+			event.reply('removeMegaArchive_res', {status: "error", message: error, url: args.url, name: args.name});
+		});
+	});
+	
 	scraper_importer.loginVNDB_basic()
 	.then(function(result){
 		console.log(result);
@@ -1154,6 +1166,29 @@ function setConfig(conf)
 		config = conf;
 		
 		saveJSON("config.json", config)
+		.then(function(result){
+			resolve(config);
+		})
+		.catch(function(error){
+			reject(error);
+		});
+	});
+}
+
+function removeMegaArchive(url, name)
+{
+	return new Promise((resolve, reject) => {
+		
+		for(let i = 0; i < catalog.mega.archives.length; i++)
+		{
+			if(catalog.mega.archives[i].name === name && catalog.mega.archives[i].url === url)
+			{
+				catalog.mega.archives.splice(i, 1);
+				break;
+			}
+		}
+		
+		saveJSON("catalog.json", config)
 		.then(function(result){
 			resolve(config);
 		})

@@ -67,6 +67,23 @@ function enable_mega_add_archive()
 	sub_btn.classList.toggle("disabled");
 }
 
+function removeMegaArchive()
+{
+	let tab = document.getElementsByClassName("tab_mega current")[0];
+	
+	this.classList.add("disabled");
+	this.removeEventListener("click", removeMegaArchive);
+	
+	ipcRenderer.send('removeMegaArchive', {url: tab.getAttribute("url"), name: tab.innerHTML.trim()});
+}
+
+function enableRemoveArchive()
+{
+	let btn = document.getElementById("remove_archive_btn");
+	btn.classList.add("disabled");
+	btn.addEventListener("click", removeMegaArchive);
+}
+
 function addMegaArchive()
 {
 	let elem = this;
@@ -98,7 +115,7 @@ function addMegaArchivePage(archive)
 	tabs_mega.ariaSelected = false;
 	
 	let tabs_box = document.getElementById("tabs_mega");
-	tabs_box.insertBefore(tab_mega, tabs_box.children[tabs_box_mega.children.length - 1])
+	tabs_box.insertBefore(tab_mega, tabs_box.children[tabs_box.children.length - 1])
 	
 	let archive_page = document.createElement("DIV");
 	archive_page.classList.add("archive_page");
@@ -107,6 +124,23 @@ function addMegaArchivePage(archive)
 	
 	enable_mega_add_archive();
 	document.getElementById("add_archive_mega_box").classList.add("hidden");
+}
+
+function removeMegaArchivePage(url, name)
+{
+	let tabs = document.getElementsByClassName("tab_mega");
+	
+	for(let i = 0; i < tabs.length; i++)
+	{
+		if(tabs[i].innerHTML.trim() === name && tabs[i].getAttribute("url") === url)
+		{
+			let page = document.getElementById(tabs[i].getAttribute("page_id"));
+			page.parentNode.removeChild(page);
+			
+			tabs[i].parentNode.removeChild(tabs[i]);
+			break;
+		}
+	}
 }
 
 function populateCatalog()
@@ -123,9 +157,10 @@ function populateCatalog()
 			let tab_mega = document.createElement("DIV");
 			tab_mega.innerHTML = catalog.mega.archives[i].name;
 			tab_mega.classList.add("tab_mega");
+			
 			tab_mega.id = "catalog_tab_" + catalog.mega.archives[i].name;
-			tabs_mega.setAttribute("page_id", "archive_" + catalog.mega.archives[i].name);
-			tabs_mega.setAttribute("url", catalog.mega.archives[i].url);
+			tab_mega.setAttribute("page_id", "archive_" + catalog.mega.archives[i].name);
+			tab_mega.setAttribute("url", catalog.mega.archives[i].url);
 			
 			let archive_page = document.createElement("DIV");
 			archive_page.classList.add("archive_page");
@@ -134,14 +169,18 @@ function populateCatalog()
 			if(i === 0)
 			{
 				tab_mega.classList.add("current");
-				tabs_mega.ariaSelected = true;
+				tab_mega.ariaSelected = true;
 			}
 			else
 			{
-				tabs_mega.ariaSelected = false;
+				tab_mega.ariaSelected = false;
 				document.getElementById("add_archive_mega_box").classList.add("hidden");
 				archive_page.classList.add("hidden");
 			}
+			
+			tab_mega.addEventListener('click', function(event){
+				changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
+			});
 			
 			tabs_box_mega.insertBefore(tab_mega, tabs_box_mega.children[tabs_box_mega.children.length - 1])
 			document.getElementById("catelog_mega").appendChild(archive_page);
@@ -364,7 +403,7 @@ function getAll_archive_res_mega()
 }
 
 function init_catalog_page()
-{
+{	
 	let catelog_tabs = document.getElementsByClassName("tab_catalog");
 
 	for(let i = 0; i < catelog_tabs.length; i++)
@@ -379,10 +418,10 @@ function init_catalog_page()
 		}
 		
 		catelog_tabs[i].addEventListener('click', function(event){
-			changePage(this, this.getAttribute("page_id"), "tab_catalog", "catalog_page");
+			changePage_catalog(this, this.getAttribute("page_id"), "tab_catalog current", "catalog_page");
 		});
 	}
-	
+
 	document.getElementById("add_mega_close").addEventListener('click', closeAddarchiveMenu);
 	
 	document.getElementById("add_archive_mega_submit").addEventListener('click', addMegaArchive);
@@ -390,6 +429,8 @@ function init_catalog_page()
 	document.getElementById("add_archive_mega").addEventListener("click", function(){
 		document.getElementById("add_archive_mega_box").style.display = "flex";
 	});
+	
+	document.getElementById("remove_archive_btn").addEventListener('click', removeMegaArchive);
 	
 	document.getElementById("mega_search_tbx").addEventListener('keypress', function(event){
 		if(event.key === 'Enter')
