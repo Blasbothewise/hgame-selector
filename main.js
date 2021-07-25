@@ -365,6 +365,10 @@ function initialiseComms()
 		});
 	});
 	
+	ipcMain.on('clearMegaDownload', (event, args) => {
+		archives.clearDownload(args);
+	});
+	
 	scraper_importer.loginVNDB_basic()
 	.then(function(result){
 		console.log(result);
@@ -1116,6 +1120,8 @@ function downloadHgame_mega(url, filename, type, retry)
 		
 		if(archives.get_current_downloads(url) === undefined || retry === true)
 		{
+			archives.clearDownload(url);
+			
 			switch(type)
 			{
 				case "mega":

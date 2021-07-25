@@ -113,6 +113,7 @@ function removeDownload(url)
 function removeDownload_viabtn()
 {
 	delete downloads[this.parentNode.id];
+	ipcRenderer.send('clearMegaDownload', this.parentNode.id);
 	
 	this.parentNode.parentNode.removeChild(this.parentNode);
 }

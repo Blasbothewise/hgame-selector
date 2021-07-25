@@ -151,6 +151,11 @@ module.exports.megaDownload = function(url, destination)
 	});
 }
 
+module.exports.clearDownload = function(url)
+{
+	delete downloads[url];
+}
+
 module.exports.cancelDownload = function (url)
 {		
 	downloads[url].cancel = true;
