@@ -289,6 +289,7 @@ function initialise_comms()
 		{
 			console.log(args.message);
 			printError(args.message);
+			enable_mega_add_archive();
 		}
 	});
 	
@@ -388,7 +389,7 @@ function initialise_comms()
 		{
 			console.log(args);
 			catalog = args.data
-			removeMegaArchivePage(args.url, args.name);
+			removeMegaArchivePage(args.url);
 			enableRemoveArchive();
 		}
 		else

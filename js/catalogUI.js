@@ -40,14 +40,15 @@ function init_mega_tabs()
 		}
 		
 		mega_tabs[i].addEventListener('click', function(event){
-			changePage(this, this.getAttribute("page_id"), "tab_mega", "archive_page");
+			changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
 		});
 	}
 }
 
 function closeAddarchiveMenu()
 {
-	this.parentNode.parentNode.style.display = "none";
+	this.parentNode.parentNode.classList.add("hidden");
+	document.getElementById("add_archive_mega").addEventListener("show_add_archive_mega", show_add_archive_mega);
 }
 
 function enable_mega_add_archive()
@@ -74,13 +75,13 @@ function removeMegaArchive()
 	this.classList.add("disabled");
 	this.removeEventListener("click", removeMegaArchive);
 	
-	ipcRenderer.send('removeMegaArchive', {url: tab.getAttribute("url"), name: tab.innerHTML.trim()});
+	ipcRenderer.send('removeMegaArchive', {url: tab.getAttribute("url")});
 }
 
 function enableRemoveArchive()
 {
 	let btn = document.getElementById("remove_archive_btn");
-	btn.classList.add("disabled");
+	btn.classList.remove("disabled");
 	btn.addEventListener("click", removeMegaArchive);
 }
 
@@ -110,36 +111,60 @@ function addMegaArchivePage(archive)
 	tab_mega.innerHTML = archive.name;
 	tab_mega.classList.add("tab_mega");
 	tab_mega.id = "catalog_tab_" + archive.name;
-	tabs_mega.setAttribute("page_id", "archive_" + archive.name);
-	tabs_mega.setAttribute("url", archive.url);
-	tabs_mega.ariaSelected = false;
+	tab_mega.setAttribute("page_id", "archive_" + archive.name);
+	tab_mega.setAttribute("url", archive.url);
+	
+	let archive_page = document.createElement("DIV");
+	archive_page.classList.add("archive_page");
+	archive_page.id = "archive_" + archive.name;
+	
+	if(document.getElementsByClassName("tab_mega").length === 1)
+	{
+		tab_mega.ariaSelected = true;
+		tab_mega.classList.add("current");
+	}
+	else
+	{
+		tab_mega.ariaSelected = false;
+		archive_page.classList.add("hidden");
+	}
+	
+	tab_mega.addEventListener('click', function(event){
+		changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
+	});
 	
 	let tabs_box = document.getElementById("tabs_mega");
 	tabs_box.insertBefore(tab_mega, tabs_box.children[tabs_box.children.length - 1])
 	
-	let archive_page = document.createElement("DIV");
-	archive_page.classList.add("archive_page");
-	archive_page.classList.add("hidden");
-	archive_page.id = "archive_" + archive.name;
+	document.getElementById("catelog_mega").appendChild(archive_page);
+	document.getElementById("add_archive_mega_box").classList.add("hidden");
 	
 	enable_mega_add_archive();
-	document.getElementById("add_archive_mega_box").classList.add("hidden");
 }
 
-function removeMegaArchivePage(url, name)
+function removeMegaArchivePage(url)
 {
 	let tabs = document.getElementsByClassName("tab_mega");
 	
 	for(let i = 0; i < tabs.length; i++)
 	{
-		if(tabs[i].innerHTML.trim() === name && tabs[i].getAttribute("url") === url)
+		if(tabs[i].getAttribute("url") === url)
 		{
+			console.log("boog");
+			
 			let page = document.getElementById(tabs[i].getAttribute("page_id"));
 			page.parentNode.removeChild(page);
 			
 			tabs[i].parentNode.removeChild(tabs[i]);
 			break;
 		}
+	}
+	
+	if(tabs.length >= 2)
+	{
+		tabs[0].ariaSelected = true;
+		tabs[0].classList.add("current");
+		document.getElementById(tabs[0].getAttribute("page_id")).classList.remove("hidden");
 	}
 }
 
@@ -174,7 +199,6 @@ function populateCatalog()
 			else
 			{
 				tab_mega.ariaSelected = false;
-				document.getElementById("add_archive_mega_box").classList.add("hidden");
 				archive_page.classList.add("hidden");
 			}
 			
@@ -402,6 +426,11 @@ function getAll_archive_res_mega()
 	ipcRenderer.send('searchMegaArchive', {url: archive.url, type: "all", container: "archive_" + archive.name});
 }
 
+function show_add_archive_mega()
+{
+	document.getElementById("add_archive_mega_box").classList.remove("hidden");
+}
+
 function init_catalog_page()
 {	
 	let catelog_tabs = document.getElementsByClassName("tab_catalog");
@@ -426,9 +455,7 @@ function init_catalog_page()
 	
 	document.getElementById("add_archive_mega_submit").addEventListener('click', addMegaArchive);
 	
-	document.getElementById("add_archive_mega").addEventListener("click", function(){
-		document.getElementById("add_archive_mega_box").style.display = "flex";
-	});
+	document.getElementById("add_archive_mega").addEventListener("click", show_add_archive_mega);
 	
 	document.getElementById("remove_archive_btn").addEventListener('click', removeMegaArchive);
 	

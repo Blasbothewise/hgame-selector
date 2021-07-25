@@ -77,15 +77,14 @@ function initialiseApp()
 		
 		if(catalog.mega === undefined)
 		{
-			catalog.mega = {};
-		}
-		
-		if(catalog.mega.archives == undefined)
-		{
-			catalog.mega.archives = [{
-				name: "/mggg/",
-				url: "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
-			}];
+			catalog.mega = {
+				archives: [
+							{
+						name: "/mggg/",
+						url: "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
+					}
+				]
+			};
 		}
 		
 		if(catalog.ipfs === undefined)
@@ -355,14 +354,14 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('removeMegaArchive', (event, args) => {
-		removeMegaArchive(args.url, args.name)
+		removeMegaArchive(args.url)
 		.then(function(result)
 		{
-			event.reply('removeMegaArchive_res', {status: "success", data: result, url: args.url, name: args.name});
+			event.reply('removeMegaArchive_res', {status: "success", data: result, url: args.url});
 		})
 		.catch(function(error)
 		{
-			event.reply('removeMegaArchive_res', {status: "error", message: error, url: args.url, name: args.name});
+			event.reply('removeMegaArchive_res', {status: "error", message: error, url: args.url});
 		});
 	});
 	
@@ -1175,13 +1174,13 @@ function setConfig(conf)
 	});
 }
 
-function removeMegaArchive(url, name)
+function removeMegaArchive(url)
 {
 	return new Promise((resolve, reject) => {
 		
 		for(let i = 0; i < catalog.mega.archives.length; i++)
 		{
-			if(catalog.mega.archives[i].name === name && catalog.mega.archives[i].url === url)
+			if(catalog.mega.archives[i].url === url)
 			{
 				catalog.mega.archives.splice(i, 1);
 				break;
