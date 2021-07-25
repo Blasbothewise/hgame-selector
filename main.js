@@ -78,12 +78,7 @@ function initialiseApp()
 		if(catalog.mega === undefined)
 		{
 			catalog.mega = {
-				archives: [
-							{
-						name: "/mggg/",
-						url: "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
-					}
-				]
+				archives: []
 			};
 		}
 		
@@ -376,8 +371,6 @@ function initialiseComms()
 	.catch(function(error){
 		console.log(error);
 	});
-	
-	//archives.testIPFS();
 }
 
 function hgameExists(val, varName)

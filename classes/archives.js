@@ -165,16 +165,3 @@ module.exports.get_current_downloads = function(url)
 {
 	return downloads[url];
 }
-
-module.exports.testIPFS = async function()
-{
-	console.log("IPFS test start");
-	
-	const ipfsclient = require("ipfs-http-client")
-	
-	const ipfs = new ipfsclient({host: 'localhost', port: '5001', protocol: 'http'});
-
-	const file = await ipfs.add(urlSource('https://ipfs.io/ipns/k2k4r8l7mxpi57sotykoy5f5ucakg0dr0ib0avmyjhwmofkvpfhfd510/bin.html'));
-
-	console.log(file);
-}
