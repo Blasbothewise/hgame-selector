@@ -1,18 +1,8 @@
 {
   "mega": {
-    "archives": [
-      {
-        "name": "test",
-        "url": "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
-      }
-    ]
+    "archives": []
   },
   "ipfs": {
-    "archives": [
-      {
-        "name": "test",
-        "url": "QmYrFmwtVDWrvidFWzPtzZNLFMnvn569DMS9KT5sQ4UkQe"
-      }
-    ]
+    "archives": []
   }
 }

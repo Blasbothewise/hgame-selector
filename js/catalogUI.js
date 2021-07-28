@@ -112,6 +112,10 @@ function removeArchivePage(url, type)
 		tabs[0].classList.add("current");
 		document.getElementById(tabs[0].getAttribute("page_id")).classList.remove("hidden");
 	}
+	else
+	{
+		document.getElementById(type + "_search_cntr").style.display = "none";
+	}
 }
 
 function populateCatalog()
@@ -154,6 +158,7 @@ function addArchivePage(archive, type)
 	{
 		tab_archive.ariaSelected = true;
 		tab_archive.classList.add("current");
+		document.getElementById(type + "_search_cntr").style.display = "flex";
 	}
 	else
 	{

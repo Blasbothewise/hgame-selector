@@ -1623,10 +1623,7 @@
 }
 
 .search_row_catelog {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+  display: none;
   width: 100%;
   height: 8.33%;
   margin-bottom: 1%;
