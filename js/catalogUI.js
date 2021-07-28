@@ -24,134 +24,76 @@ function changePage_catalog(new_tab, target, tabClass, pageClass)
 	}
 }
 
-function init_mega_tabs()
-{
-	let mega_tabs = document.getElementsByClassName("tab_mega");
-
-	for(let i = 0; i < mega_tabs.length; i++)
-	{
-		if(i === 0)
-		{
-			mega_tabs[i].ariaSelected = true;
-		}
-		else
-		{
-			mega_tabs[i].ariaSelected = false;
-		}
-		
-		mega_tabs[i].addEventListener('click', function(event){
-			changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
-		});
-	}
-}
-
-function closeAddarchiveMenu()
+function closeAddarchive()
 {
 	this.parentNode.parentNode.classList.add("hidden");
-	document.getElementById("add_archive_mega").addEventListener("show_add_archive_mega", show_add_archive_mega);
+	document.getElementById(this.getAttribute("show_btn")).addEventListener("click", show_add_archive);
 }
 
-function enable_mega_add_archive()
+function enable_add_archive(type)
 {
-	let mega_close = document.getElementById("add_mega_close");
+	let mega_close = document.getElementById("add_archive_close_" + type);
 	mega_close.classList.toggle("disabled");
-	mega_close.addEventListener('click', closeAddarchiveMenu);
+	mega_close.addEventListener('click', closeAddarchive);
 	
-	let url = document.getElementById("add_mega_tbx_url");
+	let url = document.getElementById("add_archive_url_" + type);
 	url.disabled = false;
 	
-	document.getElementById("add_mega_tbx_name").disabled = false;
+	document.getElementById("add_archive_name_" + type).disabled = false;
 	
-	let sub_btn = document.getElementById("add_archive_mega_submit");
+	let sub_btn = document.getElementById("add_archive_submit_" + type);
 	
-	sub_btn.addEventListener('click', addMegaArchive);
+	sub_btn.addEventListener('click', addArchive);
 	sub_btn.classList.toggle("disabled");
 }
 
-function removeMegaArchive()
+function removeArchive()
 {
-	let tab = document.getElementsByClassName("tab_mega current")[0];
+	let type = this.getAttribute("archive_type");
+	
+	let tab = document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0];
 	
 	this.classList.add("disabled");
-	this.removeEventListener("click", removeMegaArchive);
+	this.removeEventListener("click", removeArchive);
 	
-	ipcRenderer.send('removeMegaArchive', {url: tab.getAttribute("url")});
+	ipcRenderer.send('removeArchive', {url: tab.getAttribute("url"), type: type});
 }
 
-function enableRemoveArchive()
+function enableRemoveArchive(type)
 {
-	let btn = document.getElementById("remove_archive_btn");
+	let btn = document.getElementById(type + "_remove_archive");
 	btn.classList.remove("disabled");
-	btn.addEventListener("click", removeMegaArchive);
+	btn.addEventListener("click", removeArchive);
 }
 
-function addMegaArchive()
+function addArchive()
 {
-	let elem = this;
+	let type = this.getAttribute("archive_type");
 	
-	let mega_close = document.getElementById("add_mega_close");
+	let mega_close = document.getElementById("add_archive_submit_" + type);
 	mega_close.classList.toggle("disabled");
-	mega_close.removeEventListener('click', closeAddarchiveMenu);
+	mega_close.removeEventListener('click', closeAddarchive);
 	
-	let url = document.getElementById("add_mega_tbx_url");
-	url.disabled = true;
-	
-	let name = document.getElementById("add_mega_tbx_name");
+	let name = document.getElementById("add_archive_name_" + type);
 	name.disabled = true;
 	
-	this.removeEventListener('click', addMegaArchive);
+	let url = document.getElementById("add_archive_url_" + type);
+	url.disabled = true;
+	
+	this.removeEventListener('click', addArchive);
 	this.classList.toggle("disabled");
 	
-	ipcRenderer.send('addMegaArchive', {url: url.value.trim(), name: name.value.trim()});
+	ipcRenderer.send('addArchive', {url: url.value.trim(), name: name.value.trim(), type: type});
 }
 
-function addMegaArchivePage(archive)
+function removeArchivePage(url, type)
 {
-	let tab_mega = document.createElement("DIV");
-	tab_mega.innerHTML = archive.name;
-	tab_mega.classList.add("tab_mega");
-	tab_mega.id = "catalog_tab_" + archive.name;
-	tab_mega.setAttribute("page_id", "archive_" + archive.name);
-	tab_mega.setAttribute("url", archive.url);
-	
-	let archive_page = document.createElement("DIV");
-	archive_page.classList.add("archive_page");
-	archive_page.id = "archive_" + archive.name;
-	
-	if(document.getElementsByClassName("tab_mega").length === 1)
-	{
-		tab_mega.ariaSelected = true;
-		tab_mega.classList.add("current");
-	}
-	else
-	{
-		tab_mega.ariaSelected = false;
-		archive_page.classList.add("hidden");
-	}
-	
-	tab_mega.addEventListener('click', function(event){
-		changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
-	});
-	
-	let tabs_box = document.getElementById("tabs_mega");
-	tabs_box.insertBefore(tab_mega, tabs_box.children[tabs_box.children.length - 1])
-	
-	document.getElementById("catelog_mega").appendChild(archive_page);
-	document.getElementById("add_archive_mega_box").classList.add("hidden");
-	
-	enable_mega_add_archive();
-}
-
-function removeMegaArchivePage(url)
-{
-	let tabs = document.getElementsByClassName("tab_mega");
+	let tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
 	
 	for(let i = 0; i < tabs.length; i++)
 	{
 		if(tabs[i].getAttribute("url") === url)
 		{
-			console.log("boog");
-			
 			let page = document.getElementById(tabs[i].getAttribute("page_id"));
 			page.parentNode.removeChild(page);
 			
@@ -159,6 +101,10 @@ function removeMegaArchivePage(url)
 			break;
 		}
 	}
+	
+	tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
+	
+	console.log(tabs);
 	
 	if(tabs.length >= 2)
 	{
@@ -174,43 +120,59 @@ function populateCatalog()
 	{
 		document.getElementById("mega_search_cntr").style.display = "flex";
 		
-		let tabs_box_mega = document.getElementById("tabs_mega");
-		
 		for(let i = 0; i < catalog.mega.archives.length; i++)
 		{
-			
-			let tab_mega = document.createElement("DIV");
-			tab_mega.innerHTML = catalog.mega.archives[i].name;
-			tab_mega.classList.add("tab_mega");
-			
-			tab_mega.id = "catalog_tab_" + catalog.mega.archives[i].name;
-			tab_mega.setAttribute("page_id", "archive_" + catalog.mega.archives[i].name);
-			tab_mega.setAttribute("url", catalog.mega.archives[i].url);
-			
-			let archive_page = document.createElement("DIV");
-			archive_page.classList.add("archive_page");
-			archive_page.id = "archive_" + catalog.mega.archives[i].name;
-			
-			if(i === 0)
-			{
-				tab_mega.classList.add("current");
-				tab_mega.ariaSelected = true;
-			}
-			else
-			{
-				tab_mega.ariaSelected = false;
-				archive_page.classList.add("hidden");
-			}
-			
-			tab_mega.addEventListener('click', function(event){
-				changePage_catalog(this, this.getAttribute("page_id"), "tab_mega current", "archive_page");
-			});
-			
-			tabs_box_mega.insertBefore(tab_mega, tabs_box_mega.children[tabs_box_mega.children.length - 1])
-			document.getElementById("catelog_mega").appendChild(archive_page);
+			addArchivePage( catalog.mega.archives[i], "mega");
+		}
+	}
+	
+	if(catalog.ipfs.archives.length > 0)
+	{
+		document.getElementById("ipfs_search_cntr").style.display = "flex";
+		
+		for(let i = 0; i < catalog.ipfs.archives.length; i++)
+		{
+			addArchivePage( catalog.ipfs.archives[i], "ipfs");
 		}
 	}
 }
+
+function addArchivePage(archive, type)
+{	
+	let tab_archive = document.createElement("DIV");
+	tab_archive.innerHTML = archive.name;
+	tab_archive.classList.add("tab_archive");
+	tab_archive.id = "catalog_tab_" + type + "_" + archive.name;
+	tab_archive.setAttribute("page_id", "archive_" + type + "_" + archive.name);
+	tab_archive.setAttribute("url", archive.url);
+	
+	let archive_page = document.createElement("DIV");
+	archive_page.classList.add("archive_page");
+	archive_page.id = "archive_" + type + "_" + archive.name;
+	
+	if(document.querySelectorAll("#catalog_" + type + " .tab_archive").length === 1)
+	{
+		tab_archive.ariaSelected = true;
+		tab_archive.classList.add("current");
+	}
+	else
+	{
+		tab_archive.ariaSelected = false;
+		archive_page.classList.add("hidden");
+	}
+	
+	tab_archive.addEventListener('click', function(event){
+		changePage_catalog(this, this.getAttribute("page_id"), "tab_archive current", "archive_page");
+	});
+	
+	let tabs_box = document.getElementById("tabs_" + type);
+	tabs_box.insertBefore(tab_archive, tabs_box.children[tabs_box.children.length - 1])
+	
+	document.getElementById("catalog_" + type).appendChild(archive_page);
+	document.getElementById("add_archive_box_" + type).classList.add("hidden");
+}
+
+
 
 function downloadHgameMega()
 {
@@ -262,6 +224,63 @@ function downloadHgameMega()
 	}
 }
 
+function downloadHgame()
+{
+	let type = this.parentNode.parentNode.getAttribute("archive_type");
+	
+	if(downloads[this.parentNode.parentNode.getAttribute("url")] !== undefined)
+	{
+		printError("Already downloading.");
+	}
+	else if(downloads_count < 4)
+	{	
+		this.removeEventListener("click", downloadHgame);
+		this.classList.toggle("archive_result_btn_disabled");
+		
+		let elem = this;
+		
+		let enable = setInterval(function(){
+			elem.addEventListener("click", downloadHgame);
+			elem.classList.toggle("archive_result_btn_disabled");
+			clearInterval(enable);
+		}, 10000);
+		
+		let url = this.parentNode.parentNode.getAttribute("url");
+		let metadata = {
+			name: this.parentNode.parentNode.getAttribute("name"),
+			jp_name: this.parentNode.parentNode.getAttribute("jp_name"),
+			circle: this.parentNode.parentNode.getAttribute("circle"),
+			icon: this.parentNode.parentNode.getAttribute("icon"),
+			dlsite_code: this.parentNode.getAttribute("dlsite_code"),
+		};
+		
+		downloads[url] = { interval: setInterval(function(){
+				ipcRenderer.send('get_download_progress', url);
+			}, 3000),
+			type: type,
+			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true),
+			image: this.parentNode.parentNode.getAttribute("icon"),
+			filename: this.parentNode.parentNode.getAttribute("filename"),
+			url: url
+		};
+		
+		addDownload(downloads[url]);
+		
+		ipcRenderer.send('downloadHgame', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: type, retry: false});
+		
+		downloads_count++;
+	}
+	else
+	{
+		printError("Concurrent download threshold met.");
+	}
+}
+
+function downloadHgameIpfs()
+{
+	
+}
+
 function bytes_to_readable(bytes, suffix)
 {
 	var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -285,7 +304,7 @@ function bytes_to_readable(bytes, suffix)
 	}
 }
 
-function populate_mega_archive(results, container)
+function populate_archive(results, container, type)
 {
 	let res_cntr = document.getElementById(container);
 	
@@ -306,9 +325,16 @@ function populate_mega_archive(results, container)
 		archive_result.setAttribute("filename", results[i].app.name);
 		archive_result.setAttribute("dlsite_code", results[i].import_scrape.name.code);
 		archive_result.setAttribute("filesize", results[i].app.size);
+		archive_result.setAttribute("cdn", results[i].app.cdn);
+		archive_result.setAttribute("archive_type", type);
 		
 		let tags = ""
 		let tags_string = "";
+		
+		if(results[i].import_scrape.product_metadata.Genre === undefined)
+		{
+			console.log(results[i]);
+		}
 		
 		for(let i2 = 0; i2 < results[i].import_scrape.product_metadata.Genre.items.length; i2++)
 		{
@@ -351,7 +377,8 @@ function populate_mega_archive(results, container)
 				let archive_result_btn = document.createElement("div");
 				archive_result_btn.classList.add("archive_result_btn");
 				archive_result_btn.innerHTML = "download";
-				archive_result_btn.addEventListener('click', downloadHgameMega);
+				
+				archive_result_btn.addEventListener('click', downloadHgame);
 			
 			archive_result_row.appendChild(archive_res_icon);
 			archive_result_row.appendChild(archive_res_col_1);
@@ -365,70 +392,170 @@ function populate_mega_archive(results, container)
 		res_cntr.appendChild(archive_result);
 	}
 }
-
+/*
 function enableSearch_form_mega()
 {
 	document.getElementById("mega_search_tbx").disabled = false;
 	let sub_btn = document.getElementById("mega_search_submit");
 	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.addEventListener('click', search_archive_mega);
+	sub_btn.addEventListener('click', search_archive);
 	
 	let all_btn = document.getElementById("mega_get_all")
 	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.addEventListener('click', getAll_archive_res_mega);
-}
+	all_btn.addEventListener('click', getAll_archive_res);
+}*/
 
-function disableSearch_form_mega()
+function enableSearch_form(type)
+{
+	document.getElementById(type + "_search_tbx").disabled = false;
+	let sub_btn = document.getElementById(type + "_search_submit");
+	sub_btn.classList.toggle("page_search_btn_disabled");
+	sub_btn.addEventListener('click', search_archive);
+	
+	let all_btn = document.getElementById(type + "_get_all")
+	all_btn.classList.toggle("page_search_btn_disabled");
+	all_btn.addEventListener('click', getAll_archive_res);
+}
+/*
+function disableSearch_form()
 {
 	document.getElementById("mega_search_tbx").disabled = true;
 	let sub_btn = document.getElementById("mega_search_submit");
 	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.removeEventListener('click', search_archive_mega);
+	sub_btn.removeEventListener('click', search_archive);
 	
 	let all_btn = document.getElementById("mega_get_all")
 	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.removeEventListener('click', getAll_archive_res_mega);
+	all_btn.removeEventListener('click', getAll_archive_res);
+}*/
+
+function disableSearch_form(type)
+{
+	document.getElementById(type + "_search_tbx").disabled = true;
+	let sub_btn = document.getElementById(type + "_search_submit");
+	sub_btn.classList.toggle("page_search_btn_disabled");
+	sub_btn.removeEventListener('click', search_archive);
+	
+	let all_btn = document.getElementById(type + "_get_all")
+	all_btn.classList.toggle("page_search_btn_disabled");
+	all_btn.removeEventListener('click', getAll_archive_res);
 }
 
-function search_archive_mega()
+function search_archive()
 {
-	disableSearch_form_mega();
+	let type = this.getAttribute("archive_type");
+	
+	disableSearch_form(type);
+	
+	let cat;
+	
+	switch(type)
+	{
+		case "mega":
+		
+			cat = catalog.mega;
+		
+		break;
+		
+		case "ipfs":
+		
+			cat = catalog.ipfs;
+		
+		break;
+	}
 	
 	let archive;
 	
-	for(let i = 0; i < catalog.mega.archives.length; i++)
+	for(let i = 0; i < cat.archives.length; i++)
 	{
-		if(document.getElementsByClassName("tab_mega current")[0].innerHTML === catalog.mega.archives[i].name)
+		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
 		{
-			archive = catalog.mega.archives[i];
+			archive = cat.archives[i];
 			break;
 		}
 	}
 	
-	ipcRenderer.send('searchMegaArchive', {url: archive.url, type: "search", searchTerm: document.getElementById("mega_search_tbx").value.trim(), container: "archive_" + archive.name});
+	ipcRenderer.send('searchArchive', {url: archive.url, type: "search", searchTerm: document.getElementById(type + "_search_tbx").value.trim(), archive_type: type, container: "archive_" + type + "_" + archive.name});
 }
 
-function getAll_archive_res_mega()
-{
-	disableSearch_form_mega();
+function search_archive_func(type)
+{	
+	disableSearch_form(type);
+	
+	let cat;
+	
+	switch(type)
+	{
+		case "mega":
+		
+			cat = catalog.mega;
+		
+		break;
+		
+		case "ipfs":
+		
+			cat = catalog.ipfs;
+		
+		break;
+	}
 	
 	let archive;
 	
-	for(let i = 0; i < catalog.mega.archives.length; i++)
+	for(let i = 0; i < cat.archives.length; i++)
 	{
-		if(document.getElementsByClassName("tab_mega current")[0].innerHTML === catalog.mega.archives[i].name)
+		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
 		{
-			archive = catalog.mega.archives[i];
+			archive = cat.archives[i];
 			break;
 		}
 	}
 	
-	ipcRenderer.send('searchMegaArchive', {url: archive.url, type: "all", container: "archive_" + archive.name});
+	ipcRenderer.send('searchArchive', {url: archive.url, type: "search", searchTerm: document.getElementById(type + "_search_tbx").value.trim(), archive_type: type, container: "archive_" + type + "_" + archive.name});
 }
 
-function show_add_archive_mega()
+function getAll_archive_res()
 {
-	document.getElementById("add_archive_mega_box").classList.remove("hidden");
+	let type = this.getAttribute("archive_type");
+	
+	disableSearch_form(type);
+	
+	switch(type)
+	{
+		case "mega":
+		
+			cat = catalog.mega;
+		
+		break;
+		
+		case "ipfs":
+		
+			cat = catalog.ipfs;
+		
+		break;
+	}
+	
+	let archive;
+	
+	for(let i = 0; i < cat.archives.length; i++)
+	{
+		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
+		{
+			archive = cat.archives[i];
+			break;
+		}
+	}
+	
+	ipcRenderer.send('searchArchive', {url: archive.url, type: "all", archive_type: type, container: "archive_" + type + "_" + archive.name});
+}
+
+function show_add_archive_mega_old()
+{
+	document.getElementById("add_archive_box_mega").classList.remove("hidden");
+}
+
+function show_add_archive()
+{
+	document.getElementById(this.getAttribute("add_archive_box")).classList.remove("hidden");
 }
 
 function init_catalog_page()
@@ -450,22 +577,40 @@ function init_catalog_page()
 			changePage_catalog(this, this.getAttribute("page_id"), "tab_catalog current", "catalog_page");
 		});
 	}
-
-	document.getElementById("add_mega_close").addEventListener('click', closeAddarchiveMenu);
 	
-	document.getElementById("add_archive_mega_submit").addEventListener('click', addMegaArchive);
+	document.getElementById("add_archive_mega").addEventListener("click", show_add_archive);
+	document.getElementById("add_archive_submit_mega").addEventListener('click', addArchive);
+	document.getElementById("add_archive_close_mega").addEventListener('click', closeAddarchive);
 	
-	document.getElementById("add_archive_mega").addEventListener("click", show_add_archive_mega);
+	document.getElementById("add_archive_ipfs").addEventListener("click", show_add_archive);
+	document.getElementById("add_archive_submit_ipfs").addEventListener('click', addArchive);
+	document.getElementById("add_archive_close_ipfs").addEventListener('click', closeAddarchive);
 	
-	document.getElementById("remove_archive_btn").addEventListener('click', removeMegaArchive);
+	document.getElementById("mega_remove_archive").addEventListener('click', removeArchive);
 	
 	document.getElementById("mega_search_tbx").addEventListener('keypress', function(event){
 		if(event.key === 'Enter')
 		{
-			search_archive_mega();
+			search_archive_func("mega");
 		}
 	});
 	
-	document.getElementById("mega_search_submit").addEventListener('click', search_archive_mega);
-	document.getElementById("mega_get_all").addEventListener('click', getAll_archive_res_mega);
+	document.getElementById("mega_search_submit").addEventListener('click', search_archive);
+	
+	document.getElementById("mega_get_all").addEventListener('click', getAll_archive_res);
+	
+	
+	
+	document.getElementById("ipfs_remove_archive").addEventListener('click', removeArchive);
+	
+	document.getElementById("ipfs_search_tbx").addEventListener('keypress', function(event){
+		if(event.key === 'Enter')
+		{
+			search_archive_func("ipfs");
+		}
+	});
+	
+	document.getElementById("ipfs_search_submit").addEventListener('click', search_archive);
+	
+	document.getElementById("ipfs_get_all").addEventListener('click', getAll_archive_res);
 }

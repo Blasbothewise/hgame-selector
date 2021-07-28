@@ -38,7 +38,7 @@ function submit_config()
 {	
 	let elems = [
 		document.getElementById("config_tbx_downloads"),
-		//document.getElementById("config_tbx_install"),
+		//document.getElementById("config_tbx_daemon_hostname"),
 	];
 	
 	let valError = false;
@@ -60,10 +60,15 @@ function submit_config()
 	{
 		let config = {
 			downloads_path: document.getElementById("config_tbx_downloads").value.trim(),
-			//install_path: document.getElementById("config_tbx_install").value.trim(),
+			ipfs_daemon_hostname: document.getElementById("config_tbx_daemon_hostname").value.trim(),
 		};
 		
 		ipcRenderer.send('setConfig', config);
+		
+		ipcRenderer.send('reconnect_ipfs', {
+			hostname: config.ipfs_daemon_hostname
+		});
+		
 		disableConfigForm();
 	}
 }
@@ -73,9 +78,9 @@ function disableConfigForm()
 	let download = document.getElementById("config_download_submit");
 	download.classList.toggle("config_btn_disabled");
 	download.removeEventListener('click', directory_dialog_config);
-	//let install = document.getElementById("config_install_submit");
-	//install.classList.toggle("config_btn_disabled");
-	//install.removeEventListener('click', directory_dialog_config);
+	let daemon = document.getElementById("config_daemon_connect");
+	daemon.classList.toggle("config_btn_disabled");
+	daemon.removeEventListener('click', test_ifps_daemon_config);
 	let sub = document.getElementById("config_download_submit");
 	sub.classList.toggle("config_btn_disabled");
 	download.removeEventListener('click', submit_config);
@@ -86,9 +91,9 @@ function enableConfigForm()
 	let download = document.getElementById("config_download_submit");
 	download.classList.toggle("config_btn_disabled");
 	download.addEventListener('click', directory_dialog_config);
-	//let install = document.getElementById("config_install_submit");
-	//install.classList.toggle("config_btn_disabled");
-	//install.addEventListener('click', directory_dialog_config);
+	let daemon = document.getElementById("config_daemon_connect");
+	daemon.classList.toggle("config_btn_disabled");
+	daemon.addEventListener('click', test_ifps_daemon_config);
 	let sub = document.getElementById("config_download_submit");
 	sub.classList.toggle("config_btn_disabled");
 	download.addEventListener('click', submit_config);
@@ -97,12 +102,19 @@ function enableConfigForm()
 function populate_config(config)
 {
 	document.getElementById("config_tbx_downloads").value = config.downloads_path;
-	//document.getElementById("config_tbx_install").value = config. install_path;
+	document.getElementById("config_tbx_daemon_hostname").value = config.ipfs_daemon_hostname;
+}
+
+function test_ifps_daemon_config()
+{
+	ipcRenderer.send('testIpfsDaemon_config', {
+		hostname: document.getElementById("config_tbx_daemon_hostname").value.trim()
+	});
 }
 
 function init_config()
 {
 	document.getElementById("config_download_submit").addEventListener('click', directory_dialog_config);
-	//document.getElementById("config_install_submit").addEventListener('click', directory_dialog_config);
+	document.getElementById("config_daemon_connect").addEventListener('click', test_ifps_daemon_config);
 	document.getElementById("config_submit").addEventListener('click', submit_config);
 }

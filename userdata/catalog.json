@@ -1,14 +1,18 @@
 {
-  "downloads_path": "C:\\Users\\NegaH\\Documents\\some folder",
   "mega": {
     "archives": [
       {
-        "name": "/mggg/",
+        "name": "test",
         "url": "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
       }
     ]
   },
   "ipfs": {
-    "archives": []
+    "archives": [
+      {
+        "name": "test",
+        "url": "QmYrFmwtVDWrvidFWzPtzZNLFMnvn569DMS9KT5sQ4UkQe"
+      }
+    ]
   }
 }

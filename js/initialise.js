@@ -277,19 +277,20 @@ function initialise_comms()
 		}
 	});
 	
-	ipcRenderer.on('addMegaArchive_res', (event, args) => {
+	ipcRenderer.on('addArchive_res', (event, args) => {
 		if(args.status === "success")
 		{
 			console.log(args);
 			
 			catalog = args.data;
-			addMegaArchivePage(catalog.mega.archives[catalog.mega.archives.length - 1]);
+			addArchivePage(catalog[args.type].archives[catalog[args.type].archives.length - 1], args.type);
+			enable_add_archive(args.type);
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
-			enable_mega_add_archive();
+			enable_add_archive(args.type);
 		}
 	});
 	
@@ -307,22 +308,22 @@ function initialise_comms()
 		}
 	});
 	
-	ipcRenderer.on('searchMegaArchive_res', (event, args) => {
+	ipcRenderer.on('searchArchive_res', (event, args) => {
 		if(args.status === "success")
 		{
 			console.log(args);
-			populate_mega_archive(args.data, args.container);
-			enableSearch_form_mega();
+			populate_archive(args.data, args.container, args.archive_type);
+			enableSearch_form(args.archive_type);
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
-			enableSearch_form_mega();
+			enableSearch_form(args.archive_type);
 		}
 	});
 	
-	ipcRenderer.on('get_download_progress_mega_res', (event, args) => {
+	ipcRenderer.on('get_download_progress_res', (event, args) => {
 		if(args.status === "success")
 		{
 			console.log(args);
@@ -342,7 +343,7 @@ function initialise_comms()
 		{
 			console.log("url: ", args.url);
 			
-			removeDownload(args);
+			//removeDownload(args);
 		}
 		else
 		{
@@ -384,19 +385,32 @@ function initialise_comms()
 		}
 	});
 	
-	ipcRenderer.on('removeMegaArchive_res', (event, args) => {
+	ipcRenderer.on('removeArchive_res', (event, args) => {
 		if(args.status === "success")
 		{
 			console.log(args);
 			catalog = args.data
-			removeMegaArchivePage(args.url);
-			enableRemoveArchive();
+			removeArchivePage(args.url, args.type);
+			enableRemoveArchive(args.type);
 		}
 		else
 		{
 			console.log(args.message);
 			printError(args.message);
-			enableRemoveArchive();
+			enableRemoveArchive(args.type);
+		}
+	});
+	
+	ipcRenderer.on('testIpfsDaemon_config_res', (event, args) => {
+		if(args.status === "success")
+		{
+			console.log(args);
+			printSuccess(args.message);
+		}
+		else
+		{
+			console.log(args.message);
+			printError(args.message);
 		}
 	});
 }

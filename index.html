@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  -->
-<!--  Last Published: Sat Jul 24 2021 23:36:42 GMT+0000 (Coordinated Universal Time)  -->
+<!--  Last Published: Tue Jul 27 2021 21:02:03 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="60f46555aeb557937ba1509f" data-wf-site="60ef2eb312b1833cde8808a3">
 <head>
   <meta charset="utf-8">
@@ -352,31 +352,57 @@
   <div id="catalog_page" class="page_container hidden">
     <div class="header">Browse hgames from community archives</div>
     <div id="tabsbar" class="tabs_menu_catalogs">
-      <div id="catalog_tab_mega" page_id="catelog_mega" class="tab_catalog current">Mega.nz</div>
+      <div id="catalog_tab_mega" page_id="catalog_mega" class="tab_catalog current">Mega.nz</div>
+      <div id="catalog_tab_ipfs" page_id="catalog_ipfs" class="tab_catalog">IPFS</div>
     </div>
-    <div id="catelog_mega" class="catalog_page">
+    <div id="catalog_mega" class="catalog_page">
       <div id="tabs_mega" class="tbs_mnu_catalog_sub">
-        <div id="add_archive_mega" class="tab_mega add">add archive</div>
+        <div id="add_archive_mega" add_archive_box="add_archive_box_mega" class="tab_archive add">add archive</div>
       </div>
       <div id="mega_search_cntr" class="search_row_catelog">
-        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="mega_search_tbx" placeholder="search archive"></div>
+        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="mega_search_tbx" placeholder="search archive" archive_type="mega"></div>
         <div class="search_combo_cntr w-embed"><select class="search_combo" id="mega_search_combo">
             <option value="date">date added</option>
             <option value="name">name</option>
           </select></div>
-        <div id="mega_search_submit" class="page_search_btn">search</div>
-        <div id="mega_get_all" class="page_search_btn">get all</div>
+        <div id="mega_search_submit" archive_type="mega" class="page_search_btn">search</div>
+        <div id="mega_get_all" archive_type="mega" class="page_search_btn">get all</div>
         <div class="search_spacer"></div>
-        <div id="remove_archive_btn" class="page_search_btn archive_rmv">Delete archive</div>
+        <div id="mega_remove_archive" archive_type="mega" class="page_search_btn archive_rmv">Remove archive</div>
       </div>
     </div>
-    <div id="add_archive_mega_box" class="archive_add hidden">
+    <div id="add_archive_box_mega" class="archive_add hidden">
       <div class="archive_add_header">Add mega archive</div>
       <div class="add_archive_row">
-        <div class="add_archive_tbx_cntr w-embed"><input class="tbx" id="add_mega_tbx_url" placeholder="mega url"></div>
-        <div class="add_archive_tbx_cntr_name w-embed"><input class="tbx" id="add_mega_tbx_name" placeholder="archive name"></div>
-        <div id="add_archive_mega_submit" class="add_archive_btn">add</div>
-        <div id="add_mega_close" class="add_archive_btn">close</div>
+        <div class="add_archive_tbx_cntr w-embed"><input class="tbx" id="add_archive_url_mega" placeholder="mega url"></div>
+        <div class="add_archive_tbx_cntr_name w-embed"><input class="tbx" id="add_archive_name_mega" placeholder="archive name"></div>
+        <div id="add_archive_submit_mega" archive_type="mega" class="add_archive_btn">add</div>
+        <div id="add_archive_close_mega" show_btn="add_archive_mega" class="add_archive_btn">close</div>
+      </div>
+    </div>
+    <div id="catalog_ipfs" class="catalog_page hidden">
+      <div id="tabs_ipfs" class="tbs_mnu_catalog_sub">
+        <div id="add_archive_ipfs" add_archive_box="add_archive_box_ipfs" class="tab_archive add">add archive</div>
+      </div>
+      <div id="ipfs_search_cntr" class="search_row_catelog">
+        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="ipfs_search_tbx" placeholder="search archive" archive_type="ipfs"></div>
+        <div class="search_combo_cntr w-embed"><select class="search_combo" id="mega_search_combo">
+            <option value="date">date added</option>
+            <option value="name">name</option>
+          </select></div>
+        <div id="ipfs_search_submit" archive_type="ipfs" class="page_search_btn">search</div>
+        <div id="ipfs_get_all" archive_type="ipfs" class="page_search_btn">get all</div>
+        <div class="search_spacer"></div>
+        <div id="ipfs_remove_archive" archive_type="ipfs" class="page_search_btn archive_rmv">Remove archive</div>
+      </div>
+    </div>
+    <div id="add_archive_box_ipfs" class="archive_add hidden">
+      <div class="archive_add_header">Add IPFS archive</div>
+      <div class="add_archive_row">
+        <div class="add_archive_tbx_cntr w-embed"><input class="tbx" id="add_archive_url_ipfs" placeholder="IPFS hash"></div>
+        <div class="add_archive_tbx_cntr_name w-embed"><input class="tbx" id="add_archive_name_ipfs" placeholder="archive name"></div>
+        <div id="add_archive_submit_ipfs" archive_type="ipfs" class="add_archive_btn">add</div>
+        <div id="add_archive_close_ipfs" show_btn="add_archive_ipfs" class="add_archive_btn">close</div>
       </div>
     </div>
   </div>
@@ -392,6 +418,12 @@
           <div class="config_label">Downloads path</div>
           <div class="config_tbx_cntr w-embed"><input class="config_tbx" id="config_tbx_downloads" disabled="" placeholder="Downloads path"></div>
           <div id="config_download_submit" tbx="config_tbx_downloads" class="config_btn">+</div>
+          <div class="batch_form_spacer"></div>
+        </div>
+        <div class="settings_row">
+          <div class="config_label">IPFS daemon hostname</div>
+          <div class="config_tbx_cntr w-embed"><input class="config_tbx" id="config_tbx_daemon_hostname" placeholder="IPFS daemon hostname"></div>
+          <div id="config_daemon_connect" class="config_btn">Connect</div>
           <div class="batch_form_spacer"></div>
         </div>
       </div>

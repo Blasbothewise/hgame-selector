@@ -40,6 +40,11 @@ module.exports.getDLsiteFromDirName = function (folder_name)
 		splits.push({type: "RJ", pot_id: folder_name.split("RJ").pop().substring(0,6)});
 	}
 	
+	if(folder_name.includes("RE"))
+	{
+		splits.push({type: "RJ", pot_id: folder_name.split("RE").pop().substring(0,6)});
+	}
+	
 	if(folder_name.includes("BJ"))
 	{
 		splits.push({type: "BJ", pot_id: folder_name.split("BJ").pop().substring(0,6)});
@@ -170,7 +175,9 @@ module.exports.scrapeDLsite = function(url)
 				}
 			}
 			
-			let product_metadata = {};
+			let product_metadata = {
+				Genre: {items:[]}, //to prevent undefined
+			};
 			
 			for(let i = 1; i < result('#work_outline > tbody > tr').toArray().length + 1; i++)
 			{					
@@ -230,6 +237,7 @@ module.exports.scrapeDLsite = function(url)
 							break;
 							
 							case ".main_genre":
+							
 								arr = val.find('a').toArray();
 								
 								if(arr.length === 0)

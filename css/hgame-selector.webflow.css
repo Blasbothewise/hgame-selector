@@ -1246,6 +1246,7 @@
 }
 
 .catalog_page {
+  display: block;
   width: 100%;
   height: 84%;
 }
@@ -1277,7 +1278,7 @@
   line-height: 100%;
 }
 
-.tab_mega {
+.tab_archive {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1298,15 +1299,15 @@
   cursor: pointer;
 }
 
-.tab_mega.w--current {
+.tab_archive.w--current {
   background-color: #303030;
 }
 
-.tab_mega.current {
+.tab_archive.current {
   background-color: #303030;
 }
 
-.tab_mega.add {
+.tab_archive.add {
   border-top-right-radius: 0.5vw;
   border-bottom-right-radius: 0.5vw;
   background-color: hsla(0, 0%, 86.7%, 0.43);
@@ -1579,6 +1580,10 @@
   line-height: 100%;
 }
 
+.archive_res_col_2._2_opt {
+  width: 10.5vw;
+}
+
 .archive_res_icon {
   width: 13vw;
   height: 10vw;
@@ -1705,6 +1710,10 @@
   background-color: hsla(0, 0%, 100%, 0.1);
   font-size: 1.5vw;
   line-height: 100%;
+}
+
+.archive_res_col_4.opt_2 {
+  width: 10.5vw;
 }
 
 .archive_res_col_3 {
@@ -2080,6 +2089,11 @@
   height: 80%;
   margin-right: 0.25vw;
   margin-left: 0.5vw;
+}
+
+.config_tbx_cntr.half {
+  width: 30%;
+  margin-left: 0vw;
 }
 
 .config_label {

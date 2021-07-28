@@ -94,15 +94,17 @@ function initialiseApp()
 		
 		config = result.config.json;
 		
-		//if(config.install_path === undefined)
-		//{
-		//	config.install_path = __dirname + "/install";
-		//}
+		if(config.ipfs_daemon_hostname === undefined)
+		{
+			config.ipfs_daemon_hostname = "http://127.0.0.1:5001";
+		}
 		
 		if(config.downloads_path === undefined)
 		{
-			config.downloads_path = __dirname + "/downloads";
+			config.downloads_path = __dirname + "\\downloads";
 		}
+		
+		initialiseComms();
 		
 		saveJSON("catalog.json", catalog);
 		saveJSON("config.json", config);
@@ -110,8 +112,6 @@ function initialiseApp()
 	.catch(function(error){
 		console.log(error);
 	});
-	
-	initialiseComms();
 }
 
 initialiseApp();
@@ -258,15 +258,15 @@ function initialiseComms()
 		});
 	});
 	
-	ipcMain.on('addMegaArchive', (event, args) => {
-		addMegaArchive(args.url, args.name)
+	ipcMain.on('addArchive', (event, args) => {
+		addArchive(args.url, args.name, args.type)
 		.then(function(result)
 		{
-			event.reply('addMegaArchive_res', {status: "success", data: result});
+			event.reply('addArchive_res', {status: "success", data: result, type: args.type});
 		})
 		.catch(function(error)
 		{
-			event.reply('addMegaArchive_res', {status: "error", message: error});
+			event.reply('addArchive_res', {status: "error", message: error, type: args.type});
 		});
 	});
 	
@@ -274,39 +274,39 @@ function initialiseComms()
 		event.reply('getCatalog_res', {status: "success", data: catalog});
 	});
 	
-	ipcMain.on('searchMegaArchive', (event, args) => {
+	ipcMain.on('searchArchive', (event, args) => {
 		
 		console.log(args);
 		
-		searchMegaArchive(args.url, args.type, args.searchTerm)
+		searchArchive(args.url, args.type, args.archive_type, args.searchTerm)
 		.then(function(result)
 		{
-			event.reply('searchMegaArchive_res', {status: "success", data: result, container: args.container});
+			event.reply('searchArchive_res', {status: "success", data: result, container: args.container, archive_type: args.archive_type});
 		})
 		.catch(function(error)
 		{
-			event.reply('searchMegaArchive_res', {status: "error", message: error});
+			event.reply('searchArchive_res', {status: "error", message: error, archive_type: args.archive_type});
 		});
 	});
 	
-	ipcMain.on('downloadHgame_mega', (event, args) => {
-		downloadHgame_mega(args.url, args.filename, args.type, args.retry)
+	ipcMain.on('downloadHgame', (event, args) => {
+		downloadHgame(args.url, args.filename, args.type, args.retry)
 		.then(function(result)
 		{
-			event.reply('downloadHgame_mega_res', {status: "success", data: result});
+			event.reply('downloadHgame_res', {status: "success", data: result});
 		})
 		.catch(function(error)
 		{
-			event.reply('downloadHgame_mega_res', {status: "error", message: error});
+			event.reply('downloadHgame_res', {status: "error", message: error});
 		});
 	});
 	
-	ipcMain.on('get_download_progress_mega', (event, args) => {
+	ipcMain.on('get_download_progress', (event, args) => {
 		let download = archives.get_current_downloads(args);
 		
 		if(download !== undefined || download.status != "failed")
 		{
-			event.reply('get_download_progress_mega_res', {status: "success", data: download, url: args});
+			event.reply('get_download_progress_res', {status: "success", data: download, url: args});
 		}
 		else
 		{
@@ -317,7 +317,7 @@ function initialiseComms()
 				message = download.error;
 			}
 			
-			event.reply('get_download_progress_mega_res', {status: "error", message: message, url: args});
+			event.reply('get_download_progress_res', {status: "error", message: message, url: args});
 		}
 	});
 	
@@ -348,20 +348,36 @@ function initialiseComms()
 		event.reply('getConfig_res', {status: "success", data: config});
 	});
 	
-	ipcMain.on('removeMegaArchive', (event, args) => {
-		removeMegaArchive(args.url)
+	ipcMain.on('removeArchive', (event, args) => {
+		removeArchive(args.url, args.type)
 		.then(function(result)
 		{
-			event.reply('removeMegaArchive_res', {status: "success", data: result, url: args.url});
+			event.reply('removeArchive_res', {status: "success", data: result, url: args.url, type: args.type});
 		})
 		.catch(function(error)
 		{
-			event.reply('removeMegaArchive_res', {status: "error", message: error, url: args.url});
+			event.reply('removeArchive_res', {status: "error", message: error, url: args.url, type: args.type});
 		});
 	});
 	
-	ipcMain.on('clearMegaDownload', (event, args) => {
+	ipcMain.on('clearDownload', (event, args) => {
 		archives.clearDownload(args);
+	});
+	
+	ipcMain.on('testIpfsDaemon_config', (event, args) => {
+		archives.testIpfsDaemon_config(args.hostname)
+		.then(function(result)
+		{
+			event.reply('testIpfsDaemon_config_res', {status: "success", message: "IPFS daemon successfully connected."});
+		})
+		.catch(function(error)
+		{
+			event.reply('testIpfsDaemon_config_res', {status: "error", message: error});
+		});
+	});
+	
+	ipcMain.on('reconnect_ipfs', (event, args) => {
+		archives.reconnect_ipfs(args.hostname);
 	});
 	
 	scraper_importer.loginVNDB_basic()
@@ -371,6 +387,8 @@ function initialiseComms()
 	.catch(function(error){
 		console.log(error);
 	});
+	
+	archives.initialiseIPFS(config.ipfs_daemon_hostname);
 }
 
 function hgameExists(val, varName)
@@ -999,7 +1017,7 @@ function archive_exists(type, val, varName)
 	return false;
 }
 
-function addMegaArchive(url, name)
+function addArchive(url, name, type)
 {
 	return new Promise((resolve, reject) => {
 		let existChecks = [
@@ -1010,7 +1028,7 @@ function addMegaArchive(url, name)
 		
 		for(let i = 0; i < existChecks.length; i++)
 		{
-			if(archive_exists("mega", existChecks[i][0], existChecks[i][1]) === true)
+			if(archive_exists(type, existChecks[i][0], existChecks[i][1]) === true)
 			{
 				exists = true;
 				break;
@@ -1023,9 +1041,22 @@ function addMegaArchive(url, name)
 		}
 		else
 		{
-			archives.validateMegaFolderUrl(url)
+			let validate;
+			
+			switch(type)
+			{
+				case "mega":
+					validate = archives.validateMegaFolderUrl(url);
+				break;
+				
+				case "ipfs":
+					validate = new Promise((resolve, reject) => {resolve()}); // Add some hash validation function here
+				break;
+			}
+			
+			validate
 			.then(function(result){
-				catalog.mega.archives.push({
+				catalog[type].archives.push({
 					name: name,
 					url: url
 				});
@@ -1041,15 +1072,32 @@ function addMegaArchive(url, name)
 	});
 }
 
-function searchMegaArchive(url, type, searchTerm)
+function searchArchive(url, type, archive_type, searchTerm)
 {
 	return new Promise((resolve, reject) => {
 		
+		let getFiles;
+		
+		switch(archive_type)
+		{
+			case "mega":
+				getFiles = archives.megaCatalog(url, type, searchTerm);
+			break;
+			
+			case "ipfs":
+				getFiles = archives.catalogIPFS(url, type, searchTerm);
+			break;
+		}
+		
 		let applications = [];
 		let res = [];
+
+		getFiles
+		.then(function(result){	
+
+			console.log("res:");
+			console.log(result);
 		
-		archives.megaCatalog(url, type, searchTerm)
-		.then(function(result){			
 			for(let i = 0; i < result.length; i++)
 			{
 				let dlsite_url = scraper_importer.getDLsiteFromDirName(result[i].name);
@@ -1105,7 +1153,7 @@ function searchMegaArchive(url, type, searchTerm)
 	});
 }
 
-function downloadHgame_mega(url, filename, type, retry)
+function downloadHgame(url, filename, type, retry)
 {
 	return new Promise((resolve, reject) => {
 		
@@ -1120,6 +1168,12 @@ function downloadHgame_mega(url, filename, type, retry)
 				case "mega":
 					archives.megaDownload(url, config.downloads_path + "/" + filename);
 					resolve(get_current_downloads(url));
+				break;
+				
+				case "ipfs":
+					archives.directDownload(url, config.downloads_path + "/" + filename);
+					resolve(get_current_downloads(url));
+				break;
 			}
 		}
 		else
@@ -1173,20 +1227,25 @@ function setConfig(conf)
 	});
 }
 
-function removeMegaArchive(url)
+function removeArchive(url, type)
 {
 	return new Promise((resolve, reject) => {
 		
-		for(let i = 0; i < catalog.mega.archives.length; i++)
+		if(catalog[type] === undefined)
 		{
-			if(catalog.mega.archives[i].url === url)
+			reject("Catalog type does not exist");
+		}
+		
+		for(let i = 0; i < catalog[type].archives.length; i++)
+		{
+			if(catalog[type].archives[i].url === url)
 			{
-				catalog.mega.archives.splice(i, 1);
+				catalog[type].archives.splice(i, 1);
 				break;
 			}
 		}
 		
-		saveJSON("catalog.json", config)
+		saveJSON("catalog.json", catalog)
 		.then(function(result){
 			resolve(config);
 		})
