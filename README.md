@@ -17,3 +17,7 @@ A desktop application for visualising and navigating your hgame collection.
 - How do I edit a hgame?
 	
 	Find the hgame in your collection and right click it.
+	
+- Does the IPFS download automatically seed/pin the file
+	
+	It doesn't, if/when such a feature is added it'll be entirely seperate.
