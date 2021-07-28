@@ -3,6 +3,11 @@
     "archives": []
   },
   "ipfs": {
-    "archives": []
+    "archives": [
+      {
+        "name": "r",
+        "url": "QmYrFmwtVDWrvidFWzPtzZNLFMnvn569DMS9KT5sQ4UkQe"
+      }
+    ]
   }
 }
