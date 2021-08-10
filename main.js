@@ -197,7 +197,7 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('executeEXE', (event, args) => {
-		spawn(args, [],{detached: true}, function(err, data){
+		let app = spawn(args, [],{detached: true}, function(err, data){
 			if(err)
 			{
 				console.log(err);
@@ -207,6 +207,10 @@ function initialiseComms()
 			{
 				event.reply('executeEXE_res', {status: "success"});
 			}
+		});
+		
+		app.stderr.on('data', (data) => {
+			console.error(`stderr: ${data}`);
 		});
 	});
 	
