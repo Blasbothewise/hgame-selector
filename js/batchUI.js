@@ -277,8 +277,6 @@ function add_tag_import_elem(elem, value)
 
 function populateBatch(results)
 {
-	console.log(results[0].import_scrape);
-	
 	let results_cntr = document.getElementById("batch_results_cntr");
 	
 	console.log("hgames found: " + results.length);

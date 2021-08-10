@@ -175,7 +175,7 @@ function scanForExecutable(directory)
 					
 					for(let i = 0; i < files.length; i++)
 					{
-						if(files[i].split(".").pop() === "exe") //Add other executables here
+						if(files[i].split(".").pop().toLowerCase() === "exe") //Add other executables here
 						{
 							exes.push(files[i]);
 						}

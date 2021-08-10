@@ -4,7 +4,7 @@ require('dotenv').config();
 const scraper_importer = require('./classes/scraper_importer.js');
 const storage = require('./classes/storage.js');
 const validator = require("validator");
-const child = require('child_process').execFile;
+const spawn = require('child_process').spawn;
 const fs = require('fs');
 const archives = require('./classes/archives.js');
 
@@ -197,7 +197,7 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('executeEXE', (event, args) => {
-		child(args, function(err, data){
+		spawn(args, [],{detached: true}, function(err, data){
 			if(err)
 			{
 				console.log(err);
@@ -903,56 +903,66 @@ function scanForHgames(directory)
 		storage.scanForExecutable(directory)
 		.then(function(result){
 			
-			scan_res = result;
+			console.log("result");
+			console.log(result);
 			
-			for(let i = 0; i < scan_res.length; i++)
-			{					
-				if(scan_res[i].dlsite_url !== undefined)
-				{
-					scan_res[i].type = "dlsite";
-					//Take first path from child directories search
-					
-					console.log("SPECIAL PATH: " + scan_res[i].paths[0]);
-					console.log(scan_res[i]);
-					
-					scan_res[i].dir_name = scan_res[i].paths[0][0].dir_name;
-					scan_res[i].exes = scan_res[i].paths[0][0].exes;
-					
-					identfied.push(scan_res[i]);
-					continue;
-				}
-				
-				let dlsite_url = scraper_importer.getDLsiteFromDirName(scan_res[i].dir_name.split("/").pop().toUpperCase());
-				
-				if(dlsite_url !== undefined)
-				{
-					scan_res[i].type = "dlsite";
-					scan_res[i].dlsite_url = dlsite_url,
-					identfied.push(scan_res[i]);
-					continue;
-				}
-				
-				scan_res[i].type = "unknown";
-				unidentfied.push(scan_res[i]);
-			}
-			
-			let scrape_imports = [];
-			
-			for(let i = 0; i < identfied.length; i++)
+			if(result === null)
 			{
-				if(identfied[i].type === "dlsite")
-				{
-					//console.log("URL: " + identfied[i].dlsite_url);
-					
-					scrape_imports.push(scraper_importer.scrapeDLsite(identfied[i].dlsite_url));
-				}
-				else
-				{
-					scrape_imports.push(new Promise((resolve, reject) => {resolve()}))
-				}
+				resolve(applications);
 			}
-			
-			return Promise.all(scrape_imports);
+			else
+			{
+				scan_res = result;
+				
+				for(let i = 0; i < scan_res.length; i++)
+				{					
+					if(scan_res[i].dlsite_url !== undefined)
+					{
+						scan_res[i].type = "dlsite";
+						//Take first path from child directories search
+						
+						console.log("SPECIAL PATH: " + scan_res[i].paths[0]);
+						console.log(scan_res[i]);
+						
+						scan_res[i].dir_name = scan_res[i].paths[0][0].dir_name;
+						scan_res[i].exes = scan_res[i].paths[0][0].exes;
+						
+						identfied.push(scan_res[i]);
+						continue;
+					}
+					
+					let dlsite_url = scraper_importer.getDLsiteFromDirName(scan_res[i].dir_name.split("/").pop().toUpperCase());
+					
+					if(dlsite_url !== undefined)
+					{
+						scan_res[i].type = "dlsite";
+						scan_res[i].dlsite_url = dlsite_url,
+						identfied.push(scan_res[i]);
+						continue;
+					}
+					
+					scan_res[i].type = "unknown";
+					unidentfied.push(scan_res[i]);
+				}
+				
+				let scrape_imports = [];
+				
+				for(let i = 0; i < identfied.length; i++)
+				{
+					if(identfied[i].type === "dlsite")
+					{
+						//console.log("URL: " + identfied[i].dlsite_url);
+						
+						scrape_imports.push(scraper_importer.scrapeDLsite(identfied[i].dlsite_url));
+					}
+					else
+					{
+						scrape_imports.push(new Promise((resolve, reject) => {resolve()}))
+					}
+				}
+				
+				return Promise.all(scrape_imports);
+			}
 		})
 		.then(function(results){
 			
