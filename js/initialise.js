@@ -78,11 +78,11 @@ function changePage(new_tab, target)
 		new_tab.ariaSelected = true;
 		new_tab.classList.toggle("current");
 	}
-	
+	/*
 	if(new_tab.id === "home_tab")
 	{
 		populateHome("circles", { collection: collection });
-	}
+	}*/
 }
 
 function printError(message)
