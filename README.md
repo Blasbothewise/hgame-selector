@@ -21,3 +21,11 @@ A desktop application for visualising and navigating your hgame collection.
 - Does the IPFS download automatically seed/pin the file
 	
 	It doesn't, if/when such a feature is added it'll be entirely seperate.
+	
+- Does a batch add submission fail if it contains a game I've already added?
+
+	It doesnt fail, if a hgame has already been registered it's simply ignored/skipped by the batch function. 
+	
+	There's no need to remove all the results from a scan with which you've already added.
+	
+	(Though I would advise having some kind of circle specific folder structure unless you want to scroll for ages through the results trying to find that one game you added 	  to a massive folder, or just scan the folder that the specific hgame resides in, whichever.)
