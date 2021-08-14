@@ -106,6 +106,7 @@ function initialiseApp()
 		
 		initialiseComms();
 		
+		saveJSON("collection.json", collection);
 		saveJSON("catalog.json", catalog);
 		saveJSON("config.json", config);
 	})

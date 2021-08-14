@@ -1,13 +1,13 @@
 {
   "mega": {
-    "archives": []
-  },
-  "ipfs": {
     "archives": [
       {
-        "name": "test",
-        "url": "k2k4r8l7mxpi57sotykoy5f5ucakg0dr0ib0avmyjhwmofkvpfhfd510"
+        "name": "t",
+        "url": "https://mega.nz/folder/pIplwJjb#Mh1pg3KiddYb9X3GEByjuQ"
       }
     ]
+  },
+  "ipfs": {
+    "archives": []
   }
 }

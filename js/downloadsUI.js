@@ -122,7 +122,7 @@ function updateDownload(data, url)
 {
 	let download = downloads[url];
 
-	console.log("Download completion: " + bytes_to_readable(data.retrieved_bytes, false) + "/" + download.size)
+	console.log("Download completion: " + bytes_to_readable(data.retrieved_bytes, true) + "/" + download.size)
 
 	let elem = document.getElementById(url);
 
@@ -144,7 +144,7 @@ function updateDownload(data, url)
 		break;
 		
 		case "in progress":
-			elem.children[2].innerHTML = bytes_to_readable(data.retrieved_bytes, false) + "/" + download.size;
+			elem.children[2].innerHTML = bytes_to_readable(data.retrieved_bytes, true) + "/" + download.size;
 		break;
 		
 		case "failed":

@@ -277,162 +277,169 @@ function add_tag_import_elem(elem, value)
 
 function populateBatch(results)
 {
-	let results_cntr = document.getElementById("batch_results_cntr");
-	
-	console.log("hgames found: " + results.length);
-	
-	for(let i = 0; i < results.length; i++)
+	try
 	{
-		let name;
-		let jp_name;
-		let icon;
-		let circle;
-		let tags = [];
+		let results_cntr = document.getElementById("batch_results_cntr");
 		
-		switch(results[i].app.type)
+		console.log("hgames found: " + results.length);
+		
+		for(let i = 0; i < results.length; i++)
 		{
-			case "dlsite":
-				name = results[i].import_scrape.name.name;
-				jp_name = results[i].import_scrape.jp_name;
-				icon = results[i].import_scrape.icon;
-				circle = results[i].import_scrape.brand.name;
+			let name;
+			let jp_name;
+			let icon;
+			let circle;
+			let tags = [];
+			
+			switch(results[i].app.type)
+			{
+				case "dlsite":
+					name = results[i].import_scrape.name.name;
+					jp_name = results[i].import_scrape.jp_name;
+					icon = results[i].import_scrape.icon;
+					circle = results[i].import_scrape.brand.name;
+					
+					for(let i2 = 0; i2 < results[i].import_scrape.product_metadata.Genre.items.length; i2++)
+					{
+						tags.push(results[i].import_scrape.product_metadata.Genre.items[i2].trim());
+					}
+				break
+			}
+			
+			let batch_result = document.createElement("DIV");
+			batch_result.classList.add("batch_result");
+			
+				let batch_result_row_1 = document.createElement("DIV");
+				batch_result_row_1.classList.add("batch_result_row");
+			
+					let batch_res_col_1 = document.createElement("DIV");
+					batch_res_col_1.classList.add("batch_res_col_1");
+						let batch_tbx_name = document.createElement("input");
+						batch_tbx_name.classList.add("batch_res_tbx");
+						batch_tbx_name.value = name
+						
+						let batch_tbx_jp_name = document.createElement("input");
+						batch_tbx_jp_name.classList.add("batch_res_tbx");
+						batch_tbx_jp_name.value = jp_name
+						
+					batch_res_col_1.appendChild(batch_tbx_name);
+					batch_res_col_1.appendChild(batch_tbx_jp_name);
+					
+					let batch_res_col_2 = document.createElement("DIV");
+					batch_res_col_2.classList.add("batch_res_col_2");
+					
+						let batch_tbx_circle = document.createElement("input");
+						batch_tbx_circle.classList.add("batch_res_tbx");
+						batch_tbx_circle.value = circle
+					
+					batch_res_col_2.appendChild(batch_tbx_circle);
+					
+					let batch_res_col_3 = document.createElement("DIV");
+					batch_res_col_3.classList.add("batch_res_col_3");
+					
+						let batch_tbx_dir_name = document.createElement("input");
+						batch_tbx_dir_name.classList.add("batch_res_tbx");
+						batch_tbx_dir_name.value = results[i].app.dir_name;
+						
+						let batch_tbx_icon = document.createElement("input");
+						batch_tbx_icon.classList.add("batch_res_tbx");
+						batch_tbx_icon.value = icon
+						
+					batch_res_col_3.appendChild(batch_tbx_dir_name);
+					batch_res_col_3.appendChild(batch_tbx_icon);
+					
+					let batch_result_exe = document.createElement("SELECT");
+					batch_result_exe.classList.add("batch_result_exe");
+					
+						for(let i2 = 0; i2 < results[i].app.exes.length; i2++)
+						{
+							let opt = document.createElement("OPTION");
+							opt.value = results[i].app.exes[i2];
+							opt.innerHTML = results[i].app.exes[i2];
+							opt.classList.add("batch_result_exe_opt");
+							batch_result_exe.appendChild(opt);
+						}
+						
+					batch_result_exe.selectedIndex = 0;
+					
+					let batch_result_btn_1 = document.createElement("DIV");
+					batch_result_btn_1.classList.add("batch_result_btn");
+					batch_result_btn_1.classList.add("remove");
+					batch_result_btn_1.innerHTML = "remove";
+					batch_result_btn_1.addEventListener('click', removeResult);
+					
+				batch_result_row_1.append(batch_res_col_1);
+				batch_result_row_1.append(batch_res_col_2);
+				batch_result_row_1.append(batch_res_col_3);
+				batch_result_row_1.append(batch_result_exe);
+				batch_result_row_1.append(batch_result_btn_1);
 				
-				for(let i2 = 0; i2 < results[i].import_scrape.product_metadata.Genre.items.length; i2++)
-				{
-					tags.push(results[i].import_scrape.product_metadata.Genre.items[i2].trim());
-				}
-			break
+				let batch_result_row_2 = document.createElement("DIV");
+				batch_result_row_2.classList.add("batch_result_row");
+				
+					let batch_res_tags_col = document.createElement("DIV")
+					batch_res_tags_col.classList.add("batch_res_tags_col");
+					
+						let batch_result_tags = document.createElement("DIV")
+						batch_result_tags.classList.add("batch_result_tags");
+						batch_result_tags.value = "";
+						
+							for(let i2 = 0; i2 < tags.length; i2++)
+							{
+								add_tag_import_elem(batch_result_tags, tags[i2]);
+							}
+					
+					let batch_result_tags_tbx = document.createElement("input")
+					batch_result_tags_tbx.placeholder = "a tag";
+					batch_result_tags_tbx.classList.add("batch_result_tags_tbx");
+					batch_result_tags_tbx.addEventListener('keypress', function(event){
+						if(event.key === 'Enter')
+						{
+							add_tag_import_elem(batch_result_tags, this.previousSibling.value);
+							this.value = "";
+						}
+					});
+					
+					let batch_result_tags_add = document.createElement("DIV")
+					batch_result_tags_add.classList.add("batch_result_tags_add"); 
+					batch_result_tags_add.innerHTML = "add";
+					batch_result_tags_add.addEventListener('click', function(){
+						add_tag_import_elem(batch_result_tags, this.previousSibling.value);
+						this.previousSibling.value = "";
+					});
+					
+					batch_res_tags_col.appendChild(batch_result_tags);
+					batch_res_tags_col.appendChild(batch_result_tags_tbx);
+					batch_res_tags_col.appendChild(batch_result_tags_add);
+					
+					let batch_res_icon = document.createElement("DIV")
+					batch_res_icon.classList.add("batch_res_icon");
+					batch_res_icon.style.backgroundImage = 'url("' + icon + '")';
+					
+					let batch_result_btn_2 = document.createElement("DIV")
+					batch_result_btn_2.classList.add("batch_result_btn"); 
+					batch_result_btn_2.innerHTML = "set icon";
+					batch_result_btn_2.addEventListener('click', file_dialog_batch);
+					
+				batch_result_row_2.appendChild(batch_res_tags_col);
+				batch_result_row_2.appendChild(batch_res_icon);
+				batch_result_row_2.appendChild(batch_result_btn_2);
+			
+			batch_result.appendChild(batch_result_row_1);
+			batch_result.appendChild(batch_result_row_2);
+			
+			results_cntr.appendChild(batch_result);
 		}
 		
-		let batch_result = document.createElement("DIV");
-		batch_result.classList.add("batch_result");
+		enable_batch_form();
 		
-			let batch_result_row_1 = document.createElement("DIV");
-			batch_result_row_1.classList.add("batch_result_row");
-		
-				let batch_res_col_1 = document.createElement("DIV");
-				batch_res_col_1.classList.add("batch_res_col_1");
-					let batch_tbx_name = document.createElement("input");
-					batch_tbx_name.classList.add("batch_res_tbx");
-					batch_tbx_name.value = name
-					
-					let batch_tbx_jp_name = document.createElement("input");
-					batch_tbx_jp_name.classList.add("batch_res_tbx");
-					batch_tbx_jp_name.value = jp_name
-					
-				batch_res_col_1.appendChild(batch_tbx_name);
-				batch_res_col_1.appendChild(batch_tbx_jp_name);
-				
-				let batch_res_col_2 = document.createElement("DIV");
-				batch_res_col_2.classList.add("batch_res_col_2");
-				
-					let batch_tbx_circle = document.createElement("input");
-					batch_tbx_circle.classList.add("batch_res_tbx");
-					batch_tbx_circle.value = circle
-				
-				batch_res_col_2.appendChild(batch_tbx_circle);
-				
-				let batch_res_col_3 = document.createElement("DIV");
-				batch_res_col_3.classList.add("batch_res_col_3");
-				
-					let batch_tbx_dir_name = document.createElement("input");
-					batch_tbx_dir_name.classList.add("batch_res_tbx");
-					batch_tbx_dir_name.value = results[i].app.dir_name;
-					
-					let batch_tbx_icon = document.createElement("input");
-					batch_tbx_icon.classList.add("batch_res_tbx");
-					batch_tbx_icon.value = icon
-					
-				batch_res_col_3.appendChild(batch_tbx_dir_name);
-				batch_res_col_3.appendChild(batch_tbx_icon);
-				
-				let batch_result_exe = document.createElement("SELECT");
-				batch_result_exe.classList.add("batch_result_exe");
-				
-					for(let i2 = 0; i2 < results[i].app.exes.length; i2++)
-					{
-						let opt = document.createElement("OPTION");
-						opt.value = results[i].app.exes[i2];
-						opt.innerHTML = results[i].app.exes[i2];
-						opt.classList.add("batch_result_exe_opt");
-						batch_result_exe.appendChild(opt);
-					}
-					
-				batch_result_exe.selectedIndex = 0;
-				
-				let batch_result_btn_1 = document.createElement("DIV");
-				batch_result_btn_1.classList.add("batch_result_btn");
-				batch_result_btn_1.classList.add("remove");
-				batch_result_btn_1.innerHTML = "remove";
-				batch_result_btn_1.addEventListener('click', removeResult);
-				
-			batch_result_row_1.append(batch_res_col_1);
-			batch_result_row_1.append(batch_res_col_2);
-			batch_result_row_1.append(batch_res_col_3);
-			batch_result_row_1.append(batch_result_exe);
-			batch_result_row_1.append(batch_result_btn_1);
-			
-			let batch_result_row_2 = document.createElement("DIV");
-			batch_result_row_2.classList.add("batch_result_row");
-			
-				let batch_res_tags_col = document.createElement("DIV")
-				batch_res_tags_col.classList.add("batch_res_tags_col");
-				
-					let batch_result_tags = document.createElement("DIV")
-					batch_result_tags.classList.add("batch_result_tags");
-					
-						for(let i2 = 0; i2 < tags.length; i2++)
-						{
-							add_tag_import_elem(batch_result_tags, tags[i2]);
-						}
-				
-				let batch_result_tags_tbx = document.createElement("input")
-				batch_result_tags_tbx.placeholder = "a tag";
-				batch_result_tags_tbx.classList.add("batch_result_tags_tbx");
-				batch_result_tags_tbx.addEventListener('keypress', function(event){
-					if(event.key === 'Enter')
-					{
-						add_tag_import_elem(batch_result_tags, this.previousSibling.value);
-						this.value = "";
-					}
-				});
-				
-				let batch_result_tags_add = document.createElement("DIV")
-				batch_result_tags_add.classList.add("batch_result_tags_add"); 
-				batch_result_tags_add.innerHTML = "add";
-				batch_result_tags_add.addEventListener('click', function(){
-					add_tag_import_elem(batch_result_tags, this.previousSibling.value);
-					this.previousSibling.value = "";
-				});
-				
-				batch_res_tags_col.appendChild(batch_result_tags);
-				batch_res_tags_col.appendChild(batch_result_tags_tbx);
-				batch_res_tags_col.appendChild(batch_result_tags_add);
-				
-				let batch_res_icon = document.createElement("DIV")
-				batch_res_icon.classList.add("batch_res_icon");
-				batch_res_icon.style.backgroundImage = 'url("' + icon + '")';
-				
-				let batch_result_btn_2 = document.createElement("DIV")
-				batch_result_btn_2.classList.add("batch_result_btn"); 
-				batch_result_btn_2.innerHTML = "set icon";
-				batch_result_btn_2.addEventListener('click', file_dialog_batch);
-				
-			batch_result_row_2.appendChild(batch_res_tags_col);
-			batch_result_row_2.appendChild(batch_res_icon);
-			batch_result_row_2.appendChild(batch_result_btn_2);
-		
-		batch_result.appendChild(batch_result_row_1);
-		batch_result.appendChild(batch_result_row_2);
-		
-		results_cntr.appendChild(batch_result);
+		let sub = document.getElementById("batch_submit");
+		sub.addEventListener('click', submitBatch);
+		sub.classList.remove("batch_submit_disabled");
+		sub.classList.add("batch_submit");
 	}
-	
-	enable_batch_form();
-	
-	let sub = document.getElementById("batch_submit");
-	sub.addEventListener('click', submitBatch);
-	sub.classList.remove("batch_submit_disabled");
-	sub.classList.add("batch_submit");
-	
+	catch(e)
+	{
+		printError(e);
+	}
 }
