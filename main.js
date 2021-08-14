@@ -504,19 +504,11 @@ function addHgame(data)
 		iconCheck
 		.then(function(result){
 			
-			let file_name = data.name.replaceAll('\\', '');
-			file_name = file_name.replaceAll('//', '');
-			file_name = file_name.replaceAll(':', '');
-			file_name = file_name.replaceAll('*', '');
-			file_name = file_name.replaceAll('?', '');
-			file_name = file_name.replaceAll('"', '');
-			file_name = file_name.replaceAll('<', '');
-			file_name = file_name.replaceAll('>', '');
-			file_name = file_name.replaceAll('|', '');
+			let file_name = result.split("/").pop();
 			
 			if(result !== undefined)
 			{
-				return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
+				return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name);
 			}
 			else
 			{
@@ -525,7 +517,7 @@ function addHgame(data)
 					icon = __dirname + "/" + icon;
 				}
 				
-				return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
+				return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name);	
 			}
 		})
 		.then(function(result){
@@ -620,19 +612,11 @@ function addHgameBatchRecursion(hgames, index)
 			iconCheck
 			.then(function(result){
 				
-				let file_name = data.name.replaceAll('\\', '');
-				file_name = file_name.replaceAll('//', '');
-				file_name = file_name.replaceAll(':', '');
-				file_name = file_name.replaceAll('*', '');
-				file_name = file_name.replaceAll('?', '');
-				file_name = file_name.replaceAll('"', '');
-				file_name = file_name.replaceAll('<', '');
-				file_name = file_name.replaceAll('>', '');
-				file_name = file_name.replaceAll('|', '');
+				let file_name = result.split("/").pop();
 				
 				if(result !== undefined)
 				{
-					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
+					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name);
 				}
 				else
 				{
@@ -641,7 +625,7 @@ function addHgameBatchRecursion(hgames, index)
 						icon = __dirname + "/" + icon;
 					}
 					
-					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
+					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name);	
 				}
 			})
 			.then(function(result){
@@ -778,19 +762,11 @@ function editHgame(data)
 			})
 			.then(function(result){
 				
-				let file_name = data.hgame.name.replaceAll('\\', '');
-				file_name = file_name.replaceAll('//', '');
-				file_name = file_name.replaceAll(':', '');
-				file_name = file_name.replaceAll('*', '');
-				file_name = file_name.replaceAll('?', '');
-				file_name = file_name.replaceAll('"', '');
-				file_name = file_name.replaceAll('<', '');
-				file_name = file_name.replaceAll('>', '');
-				file_name = file_name.replaceAll('|', '');
+				let file_name = result.split("/").pop();
 				
 				if(result !== undefined)
 				{
-					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name + "." + result.split('.').pop());
+					return storage.moveFile(result,  __dirname + "/userdata/icons/" + file_name);
 				}
 				else
 				{
@@ -799,7 +775,7 @@ function editHgame(data)
 						icon = __dirname + "/" + icon;
 					}
 					
-					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name + "." + icon.split('.').pop());	
+					return storage.copyFile(icon,  __dirname + "/userdata/icons/" + file_name);	
 				}
 			})
 			.then(function(result){
