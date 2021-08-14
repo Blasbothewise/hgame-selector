@@ -33,43 +33,25 @@ async function fetchHTML(url) {
 
 module.exports.getDLsiteFromDirName = function (folder_name)
 {
-	let splits = [];
-	
-	if(folder_name.includes("RJ"))
-	{
-		splits.push({type: "RJ", pot_id: folder_name.split("RJ").pop().substring(0,6)});
-	}
-	
-	if(folder_name.includes("RE"))
-	{
-		splits.push({type: "RJ", pot_id: folder_name.split("RE").pop().substring(0,6)});
-	}
-	
-	if(folder_name.includes("BJ"))
-	{
-		splits.push({type: "BJ", pot_id: folder_name.split("BJ").pop().substring(0,6)});
-	}
-	
-	if(folder_name.includes("VJ"))
-	{
-		splits.push({type: "VJ", pot_id: folder_name.split("VJ").pop().substring(0,6)});
-	}
-	
 	let winner;
 	
-	for(let i = 0; i < splits.length; i++)
+	let prefixes = ["RJ", "RE", "BJ", "BE", "VJ", "VE"];
+	
+	for(let i = 0; i < prefixes.length; i++)
 	{
-		if(validator_lib.isNumeric(splits[i].pot_id) === true)
+		let res = folder_name.match(new RegExp(prefixes[i] + "[0-9]{6,6}"));
+		
+		if(res !== null)
 		{
-			winner = splits[i];
+			winner = {type: prefixes[i].replace("E", "J"), pot_id: res[0].substring(2,8)};
 			break;
 		}
 	}
 	
 	if(winner === undefined)
 	{
-		console.log(folder_name);
-		console.log(splits[0]);
+		//console.log(folder_name);
+		//console.log(codes[0]);
 		
 		return undefined;
 	}
