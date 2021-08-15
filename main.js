@@ -198,21 +198,39 @@ function initialiseComms()
 	});
 	
 	ipcMain.on('executeEXE', (event, args) => {
-		let app = spawn(args, [],{detached: true}, function(err, data){
-			if(err)
-			{
-				console.log(err);
-				event.reply('executeEXE_res', {status: "error", message: err});
-			}
-			else
-			{
-				event.reply('executeEXE_res', {status: "success"});
-			}
-		});
+		let type = args.split(".").pop().toLowerCase();
 		
-		app.stderr.on('data', (data) => {
-			console.error(`stderr: ${data}`);
-		});
+		switch(type)
+		{
+			case "exe":
+				let app = spawn(args, [],{detached: true}, function(err, data){
+					if(err)
+					{
+						console.log(err);
+						event.reply('executeEXE_res', {status: "error", message: err});
+					}
+					else
+					{
+						event.reply('executeEXE_res', {status: "success"});
+					}
+				});
+				
+				app.stderr.on('data', (data) => {
+					console.error(`stderr: ${data}`);
+				});
+			break;
+			case "swf":
+				try
+				{
+					shell.openPath(args);
+					event.reply('executeEXE_res', {status: "success"});
+				}
+				catch(e)
+				{
+					event.reply('executeEXE_res', {status: "error", message: e});
+				}
+			break;
+		}
 	});
 	
 	ipcMain.on('scanForHgames', (event, args) => {

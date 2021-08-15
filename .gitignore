@@ -108,5 +108,9 @@ dist
 userdata/icons/
 userdata/collection.json
 userdata/catalog.json
+userdata/config.json
 downloads/
 install/
+
+#tests
+tests/
