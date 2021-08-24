@@ -185,6 +185,17 @@ function scanForExecutable(directory)
 						}
 					}
 					
+					if(applications.length === 0)
+					{
+						for(let i = 0; i < files.length; i++)
+						{
+							if(files[i].split(".").pop().toLowerCase() === "swf") //Add other executables here
+							{
+								exes.push(files[i]);
+							}
+						}
+					}
+					
 					let dlsite_code = scraper_importer.getDLsiteFromDirName(directory.split("/").pop());
 					
 					if(exes.length > 0)
