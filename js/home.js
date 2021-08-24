@@ -5,88 +5,116 @@ function populateHome(type, data)
 	
 	let results_buffer = [];
 	
-	for(let i = 0; i < col.circles.length; i++)
+	switch(type)
 	{
-		switch(type)
-		{
-			case "hgames_all":
-			case "hgames_circle":
-				if(type === "hgames_circle" && col.circles[i].name === data.target || type === "hgames_all")
-				{
-					for(let i2 = 0; i2 < col.circles[i].hgames.length; i2++)
-					{
-						results.push({
-							name: col.circles[i].hgames[i2].name,
-							icon: col.circles[i].hgames[i2].icon_path,
-							exe: col.circles[i].hgames[i2].exe_path,
-							circle_index: i,
-							index: i2,
-							type: "hgame"
-						});
-					}
-				}
-			break;
+		case "random":
 			
-			case "search":
-				if(col.circles[i].name.includes(data.searchTerm))
+			let c_index = Math.floor(Math.random() * col.circles.length);
+			
+			while(col.circles[c_index].hgames.length <= 0)
+			{
+				c_index = Math.floor(Math.random() * col.circles.length);
+			}
+			
+			let h_index = Math.floor(Math.random() * col.circles[c_index].hgames.length);
+			
+			results.push({
+				name: col.circles[c_index].hgames[h_index].name,
+				icon: col.circles[c_index].hgames[h_index].icon_path,
+				exe: col.circles[c_index].hgames[h_index].exe_path,
+				circle_index: c_index,
+				index: h_index,
+				type: "hgame"
+			});
+			
+		break;
+		
+		default:
+		
+			for(let i = 0; i < col.circles.length; i++)
+			{
+				switch(type)
 				{
-					results.push({
-						name: col.circles[i].name,
-						icon: col.circles[i].hgames[0].icon_path,
-						exe: col.circles[i].hgames[0].exe_path,
-						index: i,
-						type: "circle"
-					});
-				}
-				
-				if(col.circles[i].hgames.length > 0)
-				{
-					for(let i2 = 0; i2 < col.circles[i].hgames.length; i2++)
-					{
-						let tag_match = false;
-				
-						for(let i3 = 0; i3 < col.circles[i].hgames[i2].tags.length; i3++)
+					case "hgames_all":
+					case "hgames_circle":
+						if(type === "hgames_circle" && col.circles[i].name === data.target || type === "hgames_all")
 						{
-							if(col.circles[i].hgames[i2].tags[i3].toLowerCase() === data.searchTerm)
+							for(let i2 = 0; i2 < col.circles[i].hgames.length; i2++)
 							{
-								tag_match = true;
-								break;
+								results.push({
+									name: col.circles[i].hgames[i2].name,
+									icon: col.circles[i].hgames[i2].icon_path,
+									exe: col.circles[i].hgames[i2].exe_path,
+									circle_index: i,
+									index: i2,
+									type: "hgame"
+								});
 							}
 						}
-						
-						if(col.circles[i].hgames[i2].name.includes(data.searchTerm) || tag_match === true)
-						{							
-							results_buffer.push({
-								name: col.circles[i].hgames[i2].name,
-								icon: col.circles[i].hgames[i2].icon_path,
-								exe: col.circles[i].hgames[i2].exe_path,
-								circle_index: i,
-								index: i2,
-								type: "hgame"
+					break;
+					
+					case "search":
+						if(col.circles[i].name.includes(data.searchTerm))
+						{
+							results.push({
+								name: col.circles[i].name,
+								icon: col.circles[i].hgames[0].icon_path,
+								exe: col.circles[i].hgames[0].exe_path,
+								index: i,
+								type: "circle"
 							});
 						}
-					}
+						
+						if(col.circles[i].hgames.length > 0)
+						{
+							for(let i2 = 0; i2 < col.circles[i].hgames.length; i2++)
+							{
+								let tag_match = false;
+						
+								for(let i3 = 0; i3 < col.circles[i].hgames[i2].tags.length; i3++)
+								{
+									if(col.circles[i].hgames[i2].tags[i3].toLowerCase() === data.searchTerm)
+									{
+										tag_match = true;
+										break;
+									}
+								}
+								
+								if(col.circles[i].hgames[i2].name.includes(data.searchTerm) || tag_match === true)
+								{							
+									results_buffer.push({
+										name: col.circles[i].hgames[i2].name,
+										icon: col.circles[i].hgames[i2].icon_path,
+										exe: col.circles[i].hgames[i2].exe_path,
+										circle_index: i,
+										index: i2,
+										type: "hgame"
+									});
+								}
+							}
+						}
+					break;
+				
+					case "circles":
+					default:
+						if(col.circles[i].hgames.length === 0)
+						{
+							
+						}
+						else
+						{		
+							results.push({
+								name: col.circles[i].name,
+								icon: col.circles[i].hgames[0].icon_path,
+								exe: col.circles[i].hgames[0].exe_path,
+								index: i,
+								type: "circle"
+							});
+						}
+					break;
 				}
-			break;
-			
-			case "circles":
-			default:
-				if(col.circles[i].hgames.length === 0)
-				{
-					
-				}
-				else
-				{		
-					results.push({
-						name: col.circles[i].name,
-						icon: col.circles[i].hgames[0].icon_path,
-						exe: col.circles[i].hgames[0].exe_path,
-						index: i,
-						type: "circle"
-					});
-				}
-			break;
-		}
+			}
+		break;
 	}
 	
 	results = results.concat(results_buffer);
@@ -236,6 +264,10 @@ function initialise_home()
 			
 			this.value = "";
 		}
+	});
+	
+	document.getElementById("random_submit").addEventListener('click', function(){
+		populateHome("random",{collection: collection});
 	});
 	
 	document.getElementById("res_back_btn").addEventListener("click", function(){
