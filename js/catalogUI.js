@@ -32,9 +32,9 @@ function closeAddarchive()
 
 function enable_add_archive(type)
 {
-	let mega_close = document.getElementById("add_archive_close_" + type);
-	mega_close.classList.toggle("disabled");
-	mega_close.addEventListener('click', closeAddarchive);
+	let add_close = document.getElementById("add_archive_close_" + type);
+	add_close.classList.remove("disabled");
+	add_close.addEventListener('click', closeAddarchive);
 	
 	let url = document.getElementById("add_archive_url_" + type);
 	url.disabled = false;
@@ -44,7 +44,7 @@ function enable_add_archive(type)
 	let sub_btn = document.getElementById("add_archive_submit_" + type);
 	
 	sub_btn.addEventListener('click', addArchive);
-	sub_btn.classList.toggle("disabled");
+	sub_btn.classList.remove("disabled");
 }
 
 function removeArchive()

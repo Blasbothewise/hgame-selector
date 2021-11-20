@@ -308,7 +308,14 @@ function initialiseComms()
 		})
 		.catch(function(error)
 		{
-			event.reply('searchArchive_res', {status: "error", message: error, archive_type: args.archive_type});
+			if(error.code === 'ECONNREFUSED' && args.archive_type === "ipfs")
+			{
+				event.reply('searchArchive_res', {status: "error", message: "Could not connect to local IPFS daemon", archive_type: args.archive_type});
+			}
+			else
+			{
+				event.reply('searchArchive_res', {status: "error", message: error, archive_type: args.archive_type});
+			}
 		});
 	});
 	
@@ -320,6 +327,15 @@ function initialiseComms()
 		})
 		.catch(function(error)
 		{
+			if(error.code === 'ECONNREFUSED' && args.type === "ipfs")
+			{
+				event.reply('searchArchive_res', {status: "error", message: "Could not connect to local IPFS daemon", archive_type: args.archive_type});
+			}
+			else
+			{
+				event.reply('downloadHgame_res', {status: "error", message: error});
+			}
+			
 			event.reply('downloadHgame_res', {status: "error", message: error});
 		});
 	});
