@@ -310,11 +310,11 @@ function initialiseComms()
 		{
 			if(error.code === 'ECONNREFUSED' && args.archive_type === "ipfs")
 			{
-				event.reply('searchArchive_res', {status: "error", message: "Could not connect to local IPFS daemon", archive_type: args.archive_type});
+				event.reply('searchArchive_res', {status: "error", message: "Could not connect to local IPFS daemon", container: args.container, archive_type: args.archive_type});
 			}
 			else
 			{
-				event.reply('searchArchive_res', {status: "error", message: error, archive_type: args.archive_type});
+				event.reply('searchArchive_res', {status: "error", message: error, container: args.container, archive_type: args.archive_type});
 			}
 		});
 	});
@@ -1272,7 +1272,7 @@ function removeArchive(url, type)
 		
 		saveJSON("catalog.json", catalog)
 		.then(function(result){
-			resolve(config);
+			resolve(catalog);
 		})
 		.catch(function(error){
 			reject(error);

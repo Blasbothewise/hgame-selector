@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--  This site was created in Webflow. http://www.webflow.com  -->
-<!--  Last Published: Mon Aug 23 2021 22:24:52 GMT+0000 (Coordinated Universal Time)  -->
+<!--  Last Published: Sat Nov 20 2021 19:51:15 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="60f46555aeb557937ba1509f" data-wf-site="60ef2eb312b1833cde8808a3">
 <head>
   <meta charset="utf-8">
@@ -98,18 +98,18 @@
   background-size: contain;
   background-repeat: no-repeat
 }
-.archive_page::-webkit-scrollbar 
+.archive_page_results::-webkit-scrollbar 
 {
 	background: #212121;
   width: 1vw;
   height: 0px;
 }
-.archive_page::-webkit-scrollbar-thumb 
+.archive_page_results::-webkit-scrollbar-thumb 
 {
 	background: #4a4950; 
   border-radius: 1vw;
 }
-.archive_page
+.archive_page_results
 {
 	overflow-x: hidden;
 }
@@ -360,17 +360,6 @@
       <div id="tabs_mega" class="tbs_mnu_catalog_sub">
         <div id="add_archive_mega" add_archive_box="add_archive_box_mega" class="tab_archive add">add archive</div>
       </div>
-      <div id="mega_search_cntr" class="search_row_catelog">
-        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="mega_search_tbx" placeholder="search archive" archive_type="mega"></div>
-        <div class="search_combo_cntr w-embed"><select class="search_combo" id="mega_search_combo">
-            <option value="date">date added</option>
-            <option value="name">name</option>
-          </select></div>
-        <div id="mega_search_submit" archive_type="mega" class="page_search_btn">search</div>
-        <div id="mega_get_all" archive_type="mega" class="page_search_btn">get all</div>
-        <div class="search_spacer"></div>
-        <div id="mega_remove_archive" archive_type="mega" class="page_search_btn archive_rmv">Remove archive</div>
-      </div>
     </div>
     <div id="add_archive_box_mega" class="archive_add hidden">
       <div class="archive_add_header">Add mega archive</div>
@@ -384,17 +373,6 @@
     <div id="catalog_ipfs" class="catalog_page hidden">
       <div id="tabs_ipfs" class="tbs_mnu_catalog_sub">
         <div id="add_archive_ipfs" add_archive_box="add_archive_box_ipfs" class="tab_archive add">add archive</div>
-      </div>
-      <div id="ipfs_search_cntr" class="search_row_catelog">
-        <div class="search_tbx_cntr w-embed"><input class="search_tbx" id="ipfs_search_tbx" placeholder="search archive" archive_type="ipfs"></div>
-        <div class="search_combo_cntr w-embed"><select class="search_combo" id="mega_search_combo">
-            <option value="date">date added</option>
-            <option value="name">name</option>
-          </select></div>
-        <div id="ipfs_search_submit" archive_type="ipfs" class="page_search_btn">search</div>
-        <div id="ipfs_get_all" archive_type="ipfs" class="page_search_btn">get all</div>
-        <div class="search_spacer"></div>
-        <div id="ipfs_remove_archive" archive_type="ipfs" class="page_search_btn archive_rmv">Remove archive</div>
       </div>
     </div>
     <div id="add_archive_box_ipfs" class="archive_add hidden">

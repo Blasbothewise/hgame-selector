@@ -313,13 +313,13 @@ function initialise_comms()
 		{
 			console.log(args);
 			populate_archive(args.data, args.container, args.archive_type);
-			enableSearch_form(args.archive_type);
+			enableSearch_form(args.container);
 		}
 		else
 		{
-			console.log(args.message);
+			console.log(args);
 			printError(args.message);
-			enableSearch_form(args.archive_type);
+			enableSearch_form(args.container);
 		}
 	});
 	
@@ -391,7 +391,6 @@ function initialise_comms()
 			console.log(args);
 			catalog = args.data
 			removeArchivePage(args.url, args.type);
-			enableRemoveArchive(args.type);
 		}
 		else
 		{

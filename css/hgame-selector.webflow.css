@@ -23,6 +23,10 @@
   align-items: center;
 }
 
+.search_row.archive {
+  height: 8.75%;
+}
+
 .results_container {
   display: -webkit-box;
   display: -webkit-flex;
@@ -417,7 +421,8 @@
   cursor: pointer;
 }
 
-.page_search_btn.page_search_btn_disabled {
+.page_search_btn.disabled {
+  background-color: #a8a8a8;
   cursor: auto;
 }
 
@@ -1343,8 +1348,8 @@
 }
 
 .archive_page {
-  overflow: scroll;
-  height: 75%;
+  overflow: hidden;
+  height: 82%;
 }
 
 .archive_page.hidden {
@@ -1623,7 +1628,10 @@
 }
 
 .search_row_catelog {
-  display: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   width: 100%;
   height: 8.33%;
   margin-bottom: 1%;
@@ -2088,11 +2096,6 @@
   margin-left: 0.5vw;
 }
 
-.config_tbx_cntr.half {
-  width: 30%;
-  margin-left: 0vw;
-}
-
 .config_label {
   display: -webkit-box;
   display: -webkit-flex;
@@ -2172,4 +2175,9 @@
 
 .search_spacer {
   width: 17%;
+}
+
+.archive_page_results {
+  overflow: scroll;
+  height: 90.25%;
 }

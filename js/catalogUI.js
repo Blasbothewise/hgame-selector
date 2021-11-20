@@ -1,5 +1,4 @@
 
-
 function changePage_catalog(new_tab, target, tabClass, pageClass)
 {	
 	console.log(target);
@@ -24,12 +23,6 @@ function changePage_catalog(new_tab, target, tabClass, pageClass)
 	}
 }
 
-function closeAddarchive()
-{
-	this.parentNode.parentNode.classList.add("hidden");
-	document.getElementById(this.getAttribute("show_btn")).addEventListener("click", show_add_archive);
-}
-
 function enable_add_archive(type)
 {
 	let add_close = document.getElementById("add_archive_close_" + type);
@@ -49,21 +42,77 @@ function enable_add_archive(type)
 
 function removeArchive()
 {
-	let type = this.getAttribute("archive_type");
+	console.log(this);
 	
-	let tab = document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0];
+	let page = this.parentNode.parentNode;
+	let idSplit = page.id.split("_");
+	
+	let tab = document.getElementById("catalog_tab_" + idSplit[1] + "_" + idSplit[2]);
 	
 	this.classList.add("disabled");
 	this.removeEventListener("click", removeArchive);
 	
-	ipcRenderer.send('removeArchive', {url: tab.getAttribute("url"), type: type});
+	ipcRenderer.send('removeArchive', {url: tab.getAttribute("url"), type: idSplit[1]});
 }
 
-function enableRemoveArchive(type)
+function removeArchivePage(url, type)
 {
-	let btn = document.getElementById(type + "_remove_archive");
-	btn.classList.remove("disabled");
-	btn.addEventListener("click", removeArchive);
+	let tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
+	
+	for(let i = 0; i < tabs.length; i++)
+	{
+		if(tabs[i].getAttribute("url") === url)
+		{
+			let page = document.getElementById(tabs[i].getAttribute("page_id"));
+			page.parentNode.removeChild(page);
+			
+			tabs[i].parentNode.removeChild(tabs[i]);
+			break;
+		}
+	}
+	
+	tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
+	
+	if(tabs.length >= 2)
+	{
+		tabs[0].ariaSelected = true;
+		tabs[0].classList.add("current");
+		document.getElementById(tabs[0].getAttribute("page_id")).classList.remove("hidden");
+	}
+}
+
+function enableRemoveArchive(url, type)
+{
+	let tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
+	
+	for(let i = 0; i < tabs.length; i++)
+	{
+		if(tabs[i].getAttribute("url") === url)
+		{
+			let btn = document.getElementById(tabs[i].getAttribute("page_id")).querySelector(".search_row .page_search_btn.archive_rmv");
+			btn.classList.remove("disabled");
+			btn.addEventListener("click", removeArchive);
+		}
+	}
+}
+
+function populateCatalog()
+{
+	if(catalog.mega.archives.length > 0)
+	{
+		for(let i = 0; i < catalog.mega.archives.length; i++)
+		{
+			addArchivePage( catalog.mega.archives[i], "mega");
+		}
+	}
+	
+	if(catalog.ipfs.archives.length > 0)
+	{
+		for(let i = 0; i < catalog.ipfs.archives.length; i++)
+		{
+			addArchivePage( catalog.ipfs.archives[i], "ipfs");
+		}
+	}
 }
 
 function addArchive()
@@ -86,61 +135,6 @@ function addArchive()
 	ipcRenderer.send('addArchive', {url: url.value.trim(), name: name.value.trim(), type: type});
 }
 
-function removeArchivePage(url, type)
-{
-	let tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
-	
-	for(let i = 0; i < tabs.length; i++)
-	{
-		if(tabs[i].getAttribute("url") === url)
-		{
-			let page = document.getElementById(tabs[i].getAttribute("page_id"));
-			page.parentNode.removeChild(page);
-			
-			tabs[i].parentNode.removeChild(tabs[i]);
-			break;
-		}
-	}
-	
-	tabs = document.querySelectorAll("#catalog_" + type + " .tab_archive");
-	
-	console.log(tabs);
-	
-	if(tabs.length >= 2)
-	{
-		tabs[0].ariaSelected = true;
-		tabs[0].classList.add("current");
-		document.getElementById(tabs[0].getAttribute("page_id")).classList.remove("hidden");
-	}
-	else
-	{
-		document.getElementById(type + "_search_cntr").style.display = "none";
-	}
-}
-
-function populateCatalog()
-{
-	if(catalog.mega.archives.length > 0)
-	{
-		document.getElementById("mega_search_cntr").style.display = "flex";
-		
-		for(let i = 0; i < catalog.mega.archives.length; i++)
-		{
-			addArchivePage( catalog.mega.archives[i], "mega");
-		}
-	}
-	
-	if(catalog.ipfs.archives.length > 0)
-	{
-		document.getElementById("ipfs_search_cntr").style.display = "flex";
-		
-		for(let i = 0; i < catalog.ipfs.archives.length; i++)
-		{
-			addArchivePage( catalog.ipfs.archives[i], "ipfs");
-		}
-	}
-}
-
 function addArchivePage(archive, type)
 {	
 	let tab_archive = document.createElement("DIV");
@@ -154,11 +148,61 @@ function addArchivePage(archive, type)
 	archive_page.classList.add("archive_page");
 	archive_page.id = "archive_" + type + "_" + archive.name;
 	
+		search_row = document.createElement("DIV");
+		search_row.classList.add("search_row");
+		search_row.classList.add("archive");
+		
+			search_tbx_cntr = document.createElement("DIV");
+			search_tbx_cntr.classList.add("search_tbx_cntr");
+				
+				search_tbx = document.createElement("input");
+				search_tbx.classList.add("search_tbx");
+				search_tbx.placeholder = "Search " + archive.name;
+				search_tbx.addEventListener('keypress', function(event){
+					if(event.key === 'Enter')
+					{
+						search_archive(event.target);
+					}
+				});
+				
+			search_tbx_cntr.appendChild(search_tbx);
+			
+			page_search_btn = document.createElement("DIV");
+			page_search_btn.classList.add("page_search_btn");
+			page_search_btn.innerHTML = "search";
+			page_search_btn.addEventListener('click', search_archive);
+			
+			page_search_btn_2 = document.createElement("DIV");
+			page_search_btn_2.classList.add("page_search_btn");
+			page_search_btn_2.innerHTML = "get all";
+			page_search_btn_2.setAttribute('searchType', 'all');
+			page_search_btn_2.addEventListener('click', search_archive);
+			
+			search_spacer = document.createElement("DIV");
+			search_spacer.classList.add("search_spacer");
+			
+			page_search_btn_3 = document.createElement("DIV");
+			page_search_btn_3.classList.add("page_search_btn");
+			page_search_btn_3.classList.add("archive_rmv");
+			page_search_btn_3.innerHTML = "remove archive";
+			page_search_btn_3.addEventListener('click', removeArchive);
+	
+		search_row.appendChild(search_tbx_cntr);
+		search_row.appendChild(page_search_btn);
+		search_row.appendChild(page_search_btn_2);
+		search_row.appendChild(search_spacer);
+		search_row.appendChild(page_search_btn_3);
+		
+		archive_page_results = document.createElement("DIV");
+		archive_page_results.classList.add("archive_page_results");
+		
+	archive_page.appendChild(search_row);
+	archive_page.appendChild(archive_page_results);
+	
 	if(document.querySelectorAll("#catalog_" + type + " .tab_archive").length === 1)
 	{
 		tab_archive.ariaSelected = true;
 		tab_archive.classList.add("current");
-		document.getElementById(type + "_search_cntr").style.display = "flex";
 	}
 	else
 	{
@@ -177,113 +221,15 @@ function addArchivePage(archive, type)
 	document.getElementById("add_archive_box_" + type).classList.add("hidden");
 }
 
-
-
-function downloadHgameMega()
+function show_add_archive()
 {
-	if(downloads[this.parentNode.parentNode.getAttribute("url")] !== undefined)
-	{
-		printError("Already downloading.");
-	}
-	else if(downloads_count < 4)
-	{	
-		this.removeEventListener("click", downloadHgameMega);
-		this.classList.toggle("archive_result_btn_disabled");
-		
-		let elem = this;
-		
-		let enable = setInterval(function(){
-			elem.addEventListener("click", downloadHgameMega);
-			elem.classList.toggle("archive_result_btn_disabled");
-			clearInterval(enable);
-		}, 10000)
-		
-		let url = this.parentNode.parentNode.getAttribute("url");
-		let metadata = {
-			name: this.parentNode.parentNode.getAttribute("name"),
-			jp_name: this.parentNode.parentNode.getAttribute("jp_name"),
-			circle: this.parentNode.parentNode.getAttribute("circle"),
-			icon: this.parentNode.parentNode.getAttribute("icon"),
-			dlsite_code: this.parentNode.getAttribute("dlsite_code"),
-		};
-		
-		downloads[url] = { interval: setInterval(function(){
-				ipcRenderer.send('get_download_progress_mega', url);
-			}, 3000),
-			type: "mega",
-			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true),
-			image: this.parentNode.parentNode.getAttribute("icon"),
-			filename: this.parentNode.parentNode.getAttribute("filename"),
-			url: url
-		};
-		
-		addDownload(downloads[url]);
-		
-		ipcRenderer.send('downloadHgame_mega', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: "mega", retry: false});
-		
-		downloads_count++;
-	}
-	else
-	{
-		printError("Concurrent download threshold met.");
-	}
+	document.getElementById(this.getAttribute("add_archive_box")).classList.remove("hidden");
 }
 
-function downloadHgame()
+function closeAddarchive()
 {
-	let type = this.parentNode.parentNode.getAttribute("archive_type");
-	
-	if(downloads[this.parentNode.parentNode.getAttribute("url")] !== undefined)
-	{
-		printError("Already downloading.");
-	}
-	else if(downloads_count < 4)
-	{	
-		this.removeEventListener("click", downloadHgame);
-		this.classList.toggle("archive_result_btn_disabled");
-		
-		let elem = this;
-		
-		let enable = setInterval(function(){
-			elem.addEventListener("click", downloadHgame);
-			elem.classList.toggle("archive_result_btn_disabled");
-			clearInterval(enable);
-		}, 10000);
-		
-		let url = this.parentNode.parentNode.getAttribute("url");
-		let metadata = {
-			name: this.parentNode.parentNode.getAttribute("name"),
-			jp_name: this.parentNode.parentNode.getAttribute("jp_name"),
-			circle: this.parentNode.parentNode.getAttribute("circle"),
-			icon: this.parentNode.parentNode.getAttribute("icon"),
-			dlsite_code: this.parentNode.getAttribute("dlsite_code"),
-		};
-		
-		downloads[url] = { interval: setInterval(function(){
-				ipcRenderer.send('get_download_progress', url);
-			}, 3000),
-			type: type,
-			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true),
-			image: this.parentNode.parentNode.getAttribute("icon"),
-			filename: this.parentNode.parentNode.getAttribute("filename"),
-			url: url
-		};
-		
-		addDownload(downloads[url]);
-		
-		ipcRenderer.send('downloadHgame', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: type, retry: false});
-		
-		downloads_count++;
-	}
-	else
-	{
-		printError("Concurrent download threshold met.");
-	}
-}
-
-function downloadHgameIpfs()
-{
-	
+	this.parentNode.parentNode.classList.add("hidden");
+	document.getElementById(this.getAttribute("show_btn")).addEventListener("click", show_add_archive);
 }
 
 function bytes_to_readable(bytes, suffix)
@@ -309,9 +255,48 @@ function bytes_to_readable(bytes, suffix)
 	}
 }
 
+function search_archive(target)
+{	
+	let archive_page = (typeof target.parentNode === 'undefined') ? this.parentNode.parentNode : target.parentNode.parentNode.parentNode;
+	
+	let idSplit = archive_page.id.split('_');
+	
+	disableSearch_form(archive_page.id);
+	
+	let cat;
+	
+	switch(idSplit[1])
+	{
+		case "mega":
+		
+			cat = catalog.mega;
+		
+		break;
+		
+		case "ipfs":
+		
+			cat = catalog.ipfs;
+		
+		break;
+	}
+	
+	let archive;
+	
+	for(let i = 0; i < cat.archives.length; i++)
+	{
+		if(idSplit[2] === cat.archives[i].name)
+		{
+			archive = cat.archives[i];
+			break;
+		}
+	}
+	
+	ipcRenderer.send('searchArchive', {url: archive.url, type: (this.getAttribute("searchType") === "all") ? "all" : "search", searchTerm: archive_page.querySelector("div.search_row.archive > div.search_tbx_cntr > input").value.trim(), archive_type: idSplit[1], container: archive_page.id});
+}
+
 function populate_archive(results, container, type)
 {
-	let res_cntr = document.getElementById(container);
+	let res_cntr = document.getElementById(container).childNodes[1];
 	
 	while(res_cntr.firstChild)
 	{
@@ -397,170 +382,84 @@ function populate_archive(results, container, type)
 		res_cntr.appendChild(archive_result);
 	}
 }
-/*
-function enableSearch_form_mega()
-{
-	document.getElementById("mega_search_tbx").disabled = false;
-	let sub_btn = document.getElementById("mega_search_submit");
-	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.addEventListener('click', search_archive);
-	
-	let all_btn = document.getElementById("mega_get_all")
-	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.addEventListener('click', getAll_archive_res);
-}*/
 
-function enableSearch_form(type)
+function enableSearch_form(container)
 {
-	document.getElementById(type + "_search_tbx").disabled = false;
-	let sub_btn = document.getElementById(type + "_search_submit");
-	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.addEventListener('click', search_archive);
+	document.querySelector("#" + container + " > div.search_row.archive > div.search_tbx_cntr > input").disabled = false;
 	
-	let all_btn = document.getElementById(type + "_get_all")
-	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.addEventListener('click', getAll_archive_res);
-}
-/*
-function disableSearch_form()
-{
-	document.getElementById("mega_search_tbx").disabled = true;
-	let sub_btn = document.getElementById("mega_search_submit");
-	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.removeEventListener('click', search_archive);
+	let btns = document.querySelectorAll("#" + container + " .page_search_btn");
 	
-	let all_btn = document.getElementById("mega_get_all")
-	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.removeEventListener('click', getAll_archive_res);
-}*/
-
-function disableSearch_form(type)
-{
-	document.getElementById(type + "_search_tbx").disabled = true;
-	let sub_btn = document.getElementById(type + "_search_submit");
-	sub_btn.classList.toggle("page_search_btn_disabled");
-	sub_btn.removeEventListener('click', search_archive);
-	
-	let all_btn = document.getElementById(type + "_get_all")
-	all_btn.classList.toggle("page_search_btn_disabled");
-	all_btn.removeEventListener('click', getAll_archive_res);
+	btns[0].classList.toggle("disabled");
+	btns[0].addEventListener('click', search_archive);
+	btns[1].classList.toggle("disabled");
+	btns[1].addEventListener('click', search_archive);
+	btns[2].classList.toggle("disabled");
+	btns[2].removeEventListener('click', removeArchive);
 }
 
-function search_archive()
-{
-	let type = this.getAttribute("archive_type");
-	
-	disableSearch_form(type);
-	
-	let cat;
-	
-	switch(type)
-	{
-		case "mega":
-		
-			cat = catalog.mega;
-		
-		break;
-		
-		case "ipfs":
-		
-			cat = catalog.ipfs;
-		
-		break;
-	}
-	
-	let archive;
-	
-	for(let i = 0; i < cat.archives.length; i++)
-	{
-		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
-		{
-			archive = cat.archives[i];
-			break;
-		}
-	}
-	
-	ipcRenderer.send('searchArchive', {url: archive.url, type: "search", searchTerm: document.getElementById(type + "_search_tbx").value.trim(), archive_type: type, container: "archive_" + type + "_" + archive.name});
-}
-
-function search_archive_func(type)
+function disableSearch_form(container)
 {	
-	disableSearch_form(type);
+	document.querySelector("#" + container + " .search_tbx").disabled = true;
+	let btns = document.querySelectorAll("#" + container + " .page_search_btn");
 	
-	let cat;
-	
-	switch(type)
-	{
-		case "mega":
-		
-			cat = catalog.mega;
-		
-		break;
-		
-		case "ipfs":
-		
-			cat = catalog.ipfs;
-		
-		break;
-	}
-	
-	let archive;
-	
-	for(let i = 0; i < cat.archives.length; i++)
-	{
-		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
-		{
-			archive = cat.archives[i];
-			break;
-		}
-	}
-	
-	ipcRenderer.send('searchArchive', {url: archive.url, type: "search", searchTerm: document.getElementById(type + "_search_tbx").value.trim(), archive_type: type, container: "archive_" + type + "_" + archive.name});
+	btns[0].classList.toggle("disabled");
+	btns[0].removeEventListener('click', search_archive);
+	btns[1].classList.toggle("disabled");
+	btns[1].removeEventListener('click', search_archive);
+	btns[2].classList.toggle("disabled");
+	btns[2].removeEventListener('click', removeArchive);
 }
 
-function getAll_archive_res()
+function downloadHgame()
 {
-	let type = this.getAttribute("archive_type");
+	let type = this.parentNode.parentNode.getAttribute("archive_type");
 	
-	disableSearch_form(type);
-	
-	switch(type)
+	if(downloads[this.parentNode.parentNode.getAttribute("url")] !== undefined)
 	{
-		case "mega":
-		
-			cat = catalog.mega;
-		
-		break;
-		
-		case "ipfs":
-		
-			cat = catalog.ipfs;
-		
-		break;
+		printError("Already downloading.");
 	}
-	
-	let archive;
-	
-	for(let i = 0; i < cat.archives.length; i++)
+	else if(downloads_count < 4)
+	{	
+		this.removeEventListener("click", downloadHgame);
+		this.classList.toggle("archive_result_btn_disabled");
+		
+		let elem = this;
+		
+		let enable = setInterval(function(){
+			elem.addEventListener("click", downloadHgame);
+			elem.classList.toggle("archive_result_btn_disabled");
+			clearInterval(enable);
+		}, 10000);
+		
+		let url = this.parentNode.parentNode.getAttribute("url");
+		let metadata = {
+			name: this.parentNode.parentNode.getAttribute("name"),
+			jp_name: this.parentNode.parentNode.getAttribute("jp_name"),
+			circle: this.parentNode.parentNode.getAttribute("circle"),
+			icon: this.parentNode.parentNode.getAttribute("icon"),
+			dlsite_code: this.parentNode.getAttribute("dlsite_code"),
+		};
+		
+		downloads[url] = { interval: setInterval(function(){
+				ipcRenderer.send('get_download_progress', url);
+			}, 3000),
+			type: type,
+			size:  bytes_to_readable(this.parentNode.parentNode.getAttribute("filesize"),true),
+			image: this.parentNode.parentNode.getAttribute("icon"),
+			filename: this.parentNode.parentNode.getAttribute("filename"),
+			url: url
+		};
+		
+		addDownload(downloads[url]);
+		
+		ipcRenderer.send('downloadHgame', {url: url, filename: this.parentNode.parentNode.getAttribute("filename"), type: type, retry: false});
+		
+		downloads_count++;
+	}
+	else
 	{
-		if(document.querySelectorAll("#catalog_" + type +" .tab_archive.current")[0].innerHTML === cat.archives[i].name)
-		{
-			archive = cat.archives[i];
-			break;
-		}
+		printError("Concurrent download threshold met.");
 	}
-	
-	ipcRenderer.send('searchArchive', {url: archive.url, type: "all", archive_type: type, container: "archive_" + type + "_" + archive.name});
-}
-
-function show_add_archive_mega_old()
-{
-	document.getElementById("add_archive_box_mega").classList.remove("hidden");
-}
-
-function show_add_archive()
-{
-	document.getElementById(this.getAttribute("add_archive_box")).classList.remove("hidden");
 }
 
 function init_catalog_page()
@@ -590,32 +489,4 @@ function init_catalog_page()
 	document.getElementById("add_archive_ipfs").addEventListener("click", show_add_archive);
 	document.getElementById("add_archive_submit_ipfs").addEventListener('click', addArchive);
 	document.getElementById("add_archive_close_ipfs").addEventListener('click', closeAddarchive);
-	
-	document.getElementById("mega_remove_archive").addEventListener('click', removeArchive);
-	
-	document.getElementById("mega_search_tbx").addEventListener('keypress', function(event){
-		if(event.key === 'Enter')
-		{
-			search_archive_func("mega");
-		}
-	});
-	
-	document.getElementById("mega_search_submit").addEventListener('click', search_archive);
-	
-	document.getElementById("mega_get_all").addEventListener('click', getAll_archive_res);
-	
-	
-	
-	document.getElementById("ipfs_remove_archive").addEventListener('click', removeArchive);
-	
-	document.getElementById("ipfs_search_tbx").addEventListener('keypress', function(event){
-		if(event.key === 'Enter')
-		{
-			search_archive_func("ipfs");
-		}
-	});
-	
-	document.getElementById("ipfs_search_submit").addEventListener('click', search_archive);
-	
-	document.getElementById("ipfs_get_all").addEventListener('click', getAll_archive_res);
 }

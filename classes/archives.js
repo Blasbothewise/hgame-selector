@@ -236,11 +236,17 @@ module.exports.initialiseIPFS = function initialiseIPFS(hostname)
 	client = create(hostname);
 }
 
-module.exports.catalogIPFS = async function(hash, type, searchTerm)
+function timeoutPromise(time, message)
 {
-	return scanIPFS('root', hash, hash, type, searchTerm);
+	return new Promise((resolve, reject) => { 
+		setTimeout(function(){reject(message)}, time) 
+	});
 }
 
+module.exports.catalogIPFS = async function(hash, type, searchTerm)
+{	
+	return scanIPFS('root', hash, hash, type, searchTerm);
+}
 async function scanIPFS(name, hash, path, type, searchTerm)
 {
 	console.log("New recurrsive loop, hash: " + hash);
@@ -249,11 +255,17 @@ async function scanIPFS(name, hash, path, type, searchTerm)
 	{
 		let files = [];
 		
-		let gen = await client.ls(hash);
+		let gen = await Promise.race([
+			client.ls(hash),
+			timeoutPromise(60000, "IPFS scan timeout (app side)")
+		]);
 		
 		while(true)
 		{
-			let res = await gen.next();
+			let res = await Promise.race([
+				gen.next(),
+				timeoutPromise(60000, "IPFS scan timeout (app side)")
+			]);
 			
 			console.log(res);
 			
