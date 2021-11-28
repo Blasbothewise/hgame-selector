@@ -140,7 +140,7 @@ module.exports.scrapeDLsite = function(url)
 			let meta_html = result('#work_outline > tbody > tr');
 			let metaSets = [];
 			
-			let prod_name = result("#work_name").find("a");
+			let prod_name = result("#work_name");
 			let maker = result("#work_maker").find(".maker_name > a");
 			
 			let icon = result('meta[name="twitter:image:src"]').attr('content');
@@ -148,7 +148,7 @@ module.exports.scrapeDLsite = function(url)
 			product = {
 				"name": {
 					name: prod_name.text(),
-					code: getDLCode(prod_name.attr("href"), productUrls)
+					code: getDLCode(url, productUrls)
 				},
 				"icon": icon,
 				"brand": {
@@ -268,7 +268,7 @@ module.exports.scrapeDLsite = function(url)
 		})
 		.catch(function(error){
 			
-			console.log();
+			console.log(error);
 			
 			if(error.isAxiosError)
 			{

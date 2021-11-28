@@ -257,7 +257,18 @@ function bytes_to_readable(bytes, suffix)
 
 function search_archive(target)
 {	
-	let archive_page = (typeof target.parentNode === 'undefined') ? this.parentNode.parentNode : target.parentNode.parentNode.parentNode;
+	let archive_page, type;
+
+	if(typeof target.parentNode === 'undefined')
+	{
+		archive_page = this.parentNode.parentNode;
+		type = (this.getAttribute("searchType") === "all") ? "all" : "search";
+	}
+	else
+	{
+		archive_page = target.parentNode.parentNode.parentNode;
+		type = "search";
+	}
 	
 	let idSplit = archive_page.id.split('_');
 	
@@ -291,7 +302,7 @@ function search_archive(target)
 		}
 	}
 	
-	ipcRenderer.send('searchArchive', {url: archive.url, type: (this.getAttribute("searchType") === "all") ? "all" : "search", searchTerm: archive_page.querySelector("div.search_row.archive > div.search_tbx_cntr > input").value.trim(), archive_type: idSplit[1], container: archive_page.id});
+	ipcRenderer.send('searchArchive', {url: archive.url, type: type, searchTerm: archive_page.querySelector("div.search_row.archive > div.search_tbx_cntr > input").value.trim(), archive_type: idSplit[1], container: archive_page.id});
 }
 
 function populate_archive(results, container, type)
