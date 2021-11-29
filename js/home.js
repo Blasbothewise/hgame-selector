@@ -248,6 +248,40 @@ function populateHome(type, data)
 	container.style.display = "flex";
 }
 
+function HgameDateSort(a, b)
+{
+  if(a.date && b.date)
+  {
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  }
+  else if(a.date || b.date)
+  {
+    return !new Date(a.date).getTime() - !new Date(b.date).getTime();
+  }
+  else
+  {
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  }
+}
+
+function sortHgameByDate()
+{
+	let json = [
+        {
+         name: "obj_1",
+         date: "2010/01/01"
+        },
+        {
+         name: "obj_2",
+        },
+        {
+         name: "obj_3",
+         date: "2008/01/01"
+        }
+    ]
+	console.log(json.sort(sortByDate));
+}
+
 function initialise_home()
 {
 	document.getElementById("search_submit").addEventListener('click', function(){
