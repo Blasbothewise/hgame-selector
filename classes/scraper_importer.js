@@ -260,7 +260,7 @@ module.exports.scrapeDLsite = function(url)
 			return fetchHTML(url);
 		})
 		.then(function(result){
-			let prod_jp_name = result("#work_name").find("a");
+			let prod_jp_name = result("#work_name");
 			
 			product.jp_name = prod_jp_name.text();
 			
